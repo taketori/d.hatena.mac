@@ -14,10 +14,10 @@ INIT:
 	$$ini = currentmacrofilename + ".ini";			// 設定ファイル
 	$$wssegen = currentmacrofilename + ".js";		// X-WSSEヘッダ生成スクリプト
 	if(existfile($$ini) == false || existfile($$wssegen) == false){
-		goto EXIT "以下のいずれかまたは両方のファイルがないので継続できません。\n\t" + $$ini + " (設定ファイル)\n\t" + $$wssegen + " (X-WSSEヘッダ生成スクリプト)\n配布ファイルに同梱の d.hatena.mac.ini.sample、d.hatena.mac.js.sample をコピー・改名してください");
+		call EXIT "以下のいずれかまたは両方のファイルがないので継続できません。\n\t" + $$ini + " (設定ファイル)\n\t" + $$wssegen + " (X-WSSEヘッダ生成スクリプト)\n配布ファイルに同梱の d.hatena.mac.ini.sample、d.hatena.mac.js.sample をコピー・改名してください";
 	}
 	call compile_js $$ini, $$wssegen;
-	if($$return == "")	goto EXIT $$wssegen + "からコンパイルできませんでした。";
+	if($$return == "")	call EXIT $$wssegen + "からコンパイルできませんでした。";
 	$$wssegen = $$return;
 
 MAIN:
@@ -25,7 +25,7 @@ MAIN:
 	// X-WSSEデータを生成する。
 	if($id == "")	$id = input($mn + "\nこのデータを、どのアカウントで投稿しますか。\nアカウント名を入力してください。");
 	call runex_to $$wssegen +  " " + $id, 3, $$ini;
-	if(##return)	goto EXIT "X-WSSEの値を" + $$ini + "に追加する際に失敗しました。\nアカウント名か" + $$ini + "の書き込み権限・排他設定を疑ってください。";
+	if(##return)	call EXIT "X-WSSEの値を" + $$ini + "に追加する際に失敗しました。\nアカウント名か" + $$ini + "の書き込み権限・排他設定を疑ってください。";
 
 	// 投稿する内容を生成する。
 	call make_data;
@@ -71,7 +71,7 @@ compile_js:
 	// コンパイルする。
 	title $mn + "コンパイル中。少々お待ちを。:" +$$2 + " by " + $$jsc;
 	call runex_to $$jsc + " /warnaserror+ /warn:0 /out:" + $$wssegen + " " + $$2;
-	if(##return)	goto EXIT $$jsc + " を起動して " + $$2 + " をコンパイルする際に失敗しました。";
+	if(##return)	call EXIT $$jsc + " を起動して " + $$2 + " をコンパイルする際に失敗しました。";
 
 return $$wssegen;
 
@@ -122,7 +122,7 @@ connect_hatena:
 	title $mn + $$1 + "のために接続 " + $$2;
 	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
 	if(!##xmlhttp)	##xmlhttp = createobject("Microsoft.XMLHTTP");
-	if(!##xmlhttp)	goto EXIT "XMLHTTPオブジェクトにアクセスできません。";
+	if(!##xmlhttp)	call EXIT "XMLHTTPオブジェクトにアクセスできません。";
 
 	callmethod ##xmlhttp, "Open", $$1, $$2, 0;
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
@@ -131,7 +131,7 @@ connect_hatena:
 	title $mn + "XMLHTTP result = " + str(getpropnum(##xmlhttp, "status")) + ":" +  getpropstr(##xmlhttp, "statusText");
 	writeinistr $$ini, currentmacrobasename, "x-wsse", 0;
 
-	if(300 <= getpropnum(##xmlhttp, "status"))	goto EXIT $$src + " に" + $$1 + "できません。";
+	if(300 <= getpropnum(##xmlhttp, "status"))	call EXIT $$src + " に" + $$1 + "できません。";
 	call get_dom ##xmlhttp, $$src;
 
 return ##return;
@@ -144,7 +144,7 @@ get_dom:
 
 	title $mn + $$2 + "にあったXMLを解析しています。";
 	##dom = createobject("Msxml2.DOMDocument.3.0");
-	if(!##dom)	goto EXIT "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
+	if(!##dom)	call EXIT "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
 	setpropnum ##dom, "async", 0;
 
 	// XML解析
@@ -155,7 +155,7 @@ get_dom:
 		callmethod ##dom, "load", $$2;
 	}
 	if(member(member(##dom, "parseError"), "errorCode") != 0){
-		goto EXIT $$2 + " から取得したXMLファイルの解析に失敗しました:\n" + member(member(##dom, "parseError"), "reason");
+		call EXIT $$2 + " から取得したXMLファイルの解析に失敗しました:\n" + member(member(##dom, "parseError"), "reason");
 	}
 
 return ##dom;
