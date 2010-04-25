@@ -8,6 +8,24 @@ $mn = "はてなダイアリー用マクロ - ";
 
 $id = "";
 
+// 実行できない条件の時は、さっさと終了する。
+if( version < 801 ){
+	message "秀丸のバージョンが古いです。" + currentmacrobasename + "を終了します。";
+	endmacro;
+}
+
+// 初期設定
+	#_[0] = x;	#_[1] = y;
+	$_[0] = searchbuffer;	#_[2] = searchoption;	$_[1] = getsearchhist(0);
+	#_[3] = foundhilighting;	$_[2] = foundbuffer;	#_[4] = foundoption;
+	#_[5] = overwrite;	#_[6] = browsemode;	#_[7] = readonly;	#_[8] = imestate;	#_[9] = freecursor;
+	if( #_[5] )	overwriteswitch;
+	if( #_[6] )	browsemodeswitch;
+	if( #_[7] )	readonlyswitch;
+	if( #_[8] )	imeswitch;
+	if( #_[9] )	freecursorswitch;
+setcompatiblemode 0x0002 | 0x0008 | 0x0200;		// 0x002=折りたたみを無視ししてなるべく維持, 0x0008=部分編集を無視してなるべく維持, 0x0200=検索での表示を「範囲選択」。
+
 INIT:
 
 	// 設定ファイル、X-WSSEヘッダ生成スクリプトの設置場所を取得する。
@@ -27,20 +45,146 @@ MAIN:
 	call runex_to $$wssegen +  " " + $id, 3, $$ini;
 	if(##return)	call EXIT "X-WSSEの値を" + $$ini + "に追加する際に失敗しました。\nアカウント名か" + $$ini + "の書き込み権限・排他設定を疑ってください。";
 
+	##char = inputchar($mn + "Press [P]ost, [G]et, [M]odify, [D]elete or [H]elp.");
+	if     (##char == 'p')	call post $$ini;
+	else if(##char == 'g')	call get_entry $$ini;
+	else if(##char == 'm')	call mod_entry $$ini;
+	else if(##char == 'd')	call del_entry $$ini;
+	else if(##char == 'h')	call disp_help;
+
+EXIT:
+
+	if($$1 != "")	message $mn + "\n" + $$1;
+	if($$2 != "")	writeinistr $$2, currentmacrobasename, "x-wsse", 0;
+
+	escape;
+	moveto #_[0], #_[1];
+	if( #_[5] )	overwriteswitch;
+	if( #_[6] )	browsemodeswitch;
+	if( #_[7] )	readonlyswitch;
+	if( #_[8] )	imeswitch;
+	if( #_[9] )	freecursorswitch;
+
+endmacro;
+
+disp_help:
+
+	message $mn + "\n投稿:\t範囲選択をしておくと、その範囲の1行目をタイトルに、2行目以降を本文にします。\n\t範囲選択していない場合は、編集中の文章すべてを対象にします。\n修正:\t用いるデータは「投稿」と同様です。データは事前に「取得」しておくことをおすすめします。\n\t対象となる日記を選択するメニューを表示します。\n取得/削除:対象となる日記を選択するメニューを表示します。\n\n修正/削除の前には確認のダイアログを表示します。";
+
+return;
+
+post:
+//arg: $1:iniファイル
+
 	// 投稿する内容を生成する。
 	call make_data;
 
 	// はてなに接続して投稿する。
 	call connect_hatena "POST", "http://d.hatena.ne.jp/" + $id + "/atom/blog",
-		member(##return, "xml"), $$ini;
-	if(##return)	message midstr(member(member(##return, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + " に投稿しました。";		//TODO: linkノードから取得する。
-	else	message "failed";
+		member(##return, "xml"), $$1;		//失敗の時はマクロ終了。
+	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
+	<link rel="edit" href="～"/><link rel="alternate" ～/>
+	要するに、linkノードはrel=editを持つもの → rel=alternateを持つもの の順番である。*/
+	title $mn + "投稿完了";
+	##link = member(##return, "selectSingleNode", "//link");
+	if(member(##link, "getAttribute", "rel") == "edit"){
+		message $mn + "\n" + member(##link, "getAttribute", "href") + "\nに投稿しました。";
+	}
+	/*
+	##attrs = member(member(##return, "selectSingleNode", "//link"), "attributes");
+	##attr = getcollection(##attrs);
+	if(member(##attr, "nodeName")  == "rel"
+	&& member(##attr, "nodeValue") == "edit"){
+		message $mn + "\n" + member(getcollection(##attrs), "nodeValue") + "\nに投稿しました。";
+	}else{
+		message $mn + "\n" + midstr(member(member(##return, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + "\nに投稿しました。";
+	}
+	*/
 
-EXIT:
+return;
 
-	if($$1 != "")	message $mn + "\n" + $$1;
+get_entry:
+//arg: $1:iniファイル
 
-endmacro;
+	call get_list $$1, 1, "表示する";
+	$$uri = $$return;
+	call connect_hatena "GET", $$uri, "", $$1;		//失敗の時はマクロ終了。
+	title $mn;
+	question $mn + "\n以下のデータをカーソル部分に挿入します。\n[はい] = 挿入。[いいえ] = ダイアログで表示。\n\n" + $$uri;
+	if(result)	insert $$uri + "\n" + member(member(##return, "selectSingleNode", "//title"), "text") + "\n" + member(member(##return, "selectSingleNode", "//hatena:syntax"), "text");
+	else				message $$uri + "\n" + member(member(##return, "selectSingleNode", "//title"), "text") + "\n" + member(member(##return, "selectSingleNode", "//hatena:syntax"), "text");
+
+return 0;
+
+mod_entry:
+//arg: $1:iniファイル
+//TODO: 修正する日付を選択範囲から抽出する。
+
+	call get_list $$1, 1, "修正する";
+	$$uri = $$return;
+
+	// 投稿する内容を生成する。
+	call make_data;
+
+	question $mn + "修正していいですか。";
+	if(!result)	return;
+	call connect_hatena "PUT", $$uri, member(##return, "xml"), $$1;		//失敗の時はマクロ終了。
+	title $mn + "投稿完了";
+	message $mn + "\n" + member(member(##return, "selectSingleNode", "//link"), "getAttribute", "href") + "\nを修正しました。";
+
+return;
+
+del_entry:
+//arg: $1:iniファイル
+
+	//TODO: 削除するものを、範囲選択、現在のカーソル行からも選べるようにする。
+	call get_list $$1, 1, "削除する";
+	title $mn;
+	question $mn + "本当に削除しますか。\n" + $$return;
+	if(!result)	return;
+	call connect_hatena "DELETE", $$return, "", $$1;		//失敗の時はマクロ終了。
+	message $mn + "\n削除しました。";
+
+return 0;
+
+get_list:
+//arg: $1:iniファイル, #2:ページ数, $3:何の対象か
+
+	// 2ページ以降の時は、前のページへの案内をつける。
+	##i = 0;
+	if(1 < ##2){
+		$$menu[##i] = "&b <--- 前の20件 ---";
+		##i = ##i + 1;
+	}
+
+	// 現在のページの20件を取得する。
+	$$_ = "asdfghjklqwertyuiopvm";		// メニューの頭につけるあれ
+	call connect_hatena "GET", "http://d.hatena.ne.jp/" + $id + "/atom/blog?page=" + str(##2),
+	                    "", $$1;		//失敗の時はマクロ終了。
+	##entrys = member(##return, "selectNodes", "//entry"); //NOTE: not ##entries
+	##items = member(##entrys, "length");
+	while(##i < ##items + (##2 != 1) ){
+		##entry = getcollection(##entrys);
+		$$menu[##i] = "&" + midstr($$_, ##i, 1) + " " + member(member(##entry, "selectSingleNode", "title"), "text");
+		$$uri[##i] = member(member(##entry, "selectSingleNode", "link"), "getAttribute", "href");
+		##i = ##i + 1;
+	}
+
+	// このページで20件あるときは次のページもあると見なして、次のページへの案内をつける。
+	if(##i == 20 + (##2 != 1)){
+		$$menu[##i] = "&n --- 次の20件 --->";
+		##i = ##i + 1;
+	}
+
+	// メニューを表示する。
+	title $mn + $$3 + "日記のタイトルをメニューの中から選択してください。";
+	menuarray $$menu, ##i;
+	if(result == 0)											call EXIT;
+	if(result == 1 && ##2 != 1)		call get_list $$1, ##2 - 1;
+	if(result == 21 + (##2 != 1))	call get_list $$1, ##2 + 1;
+	else return $$uri[result - 1];
+
+return $$return;
 
 compile_js:
 //arg: $1:設定ファイルのフルパス,  $2:X-WSSEヘッダ生成スクリプトのフルパス(存在確認済)
@@ -114,11 +258,10 @@ return ##return;
 
 connect_hatena:
 // XMLHTTPのopenメソッドを呼び出したのち、取得したXMLをDOMDocumentでパースする。
-//arg: $1:接続方法(POST/GET), $2:接続するURI, $3:sendの引数, $4:INIファイル名
+//arg: $1:接続方法(POST/GET等), $2:接続するURI, $3:sendの引数, $4:INIファイル名
 //ret: get_dom(# "Msxml2.DOMDocument.3.0"オブジェクトの番号)。エラーの時はマクロ終了。
 
 	// XMLを取得。
-	$$src = "d.hatena.ne.jp";
 	title $mn + $$1 + "のために接続 " + $$2;
 	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
 	if(!##xmlhttp)	##xmlhttp = createobject("Microsoft.XMLHTTP");
@@ -128,11 +271,11 @@ connect_hatena:
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
 	callmethod ##xmlhttp, "send", $$3;
-	title $mn + "XMLHTTP result = " + str(getpropnum(##xmlhttp, "status")) + ":" +  getpropstr(##xmlhttp, "statusText");
-	writeinistr $$ini, currentmacrobasename, "x-wsse", 0;
+	##status = getpropnum(##xmlhttp, "status");
+	title $mn + "XMLHTTP result = " + str(##status) + ":" +  getpropstr(##xmlhttp, "statusText");
 
-	if(300 <= getpropnum(##xmlhttp, "status"))	call EXIT $$src + " に" + $$1 + "できません。";
-	call get_dom ##xmlhttp, $$src;
+	if(300 <= ##status)	call EXIT $$1 + "できません。: " + $$2, $$4;
+	if($$1 == "DELETE")	return ##status;
 
 return ##return;
 
@@ -142,7 +285,7 @@ get_dom:
 //ARG: $mn
 //ret: # "Msxml2.DOMDocument.3.0"オブジェクトの番号。エラーの時はマクロ終了。
 
-	title $mn + $$2 + "にあったXMLを解析しています。";
+	title $mn + "XMLを解析しています : " + $$2;
 	##dom = createobject("Msxml2.DOMDocument.3.0");
 	if(!##dom)	call EXIT "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
 	setpropnum ##dom, "async", 0;
@@ -157,6 +300,7 @@ get_dom:
 	if(member(member(##dom, "parseError"), "errorCode") != 0){
 		call EXIT $$2 + " から取得したXMLファイルの解析に失敗しました:\n" + member(member(##dom, "parseError"), "reason");
 	}
+	title $mn + "XMLの解析を完了しました。: " + $$2;
 
 return ##dom;
 
