@@ -35,7 +35,7 @@ INIT:
 		call EXIT "以下のいずれかまたは両方のファイルがないので継続できません。\n\t" + $$ini + " (設定ファイル)\n\t" + $$wssegen + " (X-WSSEヘッダ生成スクリプト)\n配布ファイルに同梱の d.hatena.mac.ini.sample、d.hatena.mac.js.sample をコピー・改名してください";
 	}
 	call compile_js $$ini, $$wssegen;
-	if($$return == "")	call EXIT $$wssegen + "からコンパイルできませんでした。";
+	if($$return == "")	call EXIT $$wssegen + "から実行ファイルにコンパイルできませんでした。";
 	$$wssegen = $$return;
 
 MAIN:
@@ -225,7 +225,7 @@ runex_to:
 //arg: $1:実行するプログラムのフルパス, #2:出力する場所, $3:#2がファイルの時のファイル名
 //ret: 0=正常に起動でき終了コード0だった。0以外=プログラムの起動に失敗か終了コードが0以外。
 
-	runex $$1, 1/*sync:sync*/, 0, ""/*stdin:none*/, ##2, $$3/*stdout:none*/, 0, ""/*stderr:none*/, 1, ""/*folder:current*/, 2/*show:hide*/, 0/*nodraw:draw*/, 0/*code:ansi*/;
+	runex $$1, 1/*sync:sync*/, 0, ""/*stdin:none*/, ##2, $$3/*stdout*/, 0, ""/*stderr:none*/, 1, ""/*folder:current*/, 2/*show:hide*/, 0/*nodraw:draw*/, 0/*code:ansi*/;
 
 return (result == false) + getresultex(9);
 
