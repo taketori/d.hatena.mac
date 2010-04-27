@@ -55,7 +55,8 @@ MAIN:
 EXIT:
 
 	if($$1 != "")	message $mn + "\n" + $$1;
-	if($$2 != "")	writeinistr $$2, currentmacrobasename, "x-wsse", 0;
+	if($$2 != "")	$$ini = $$2;
+	if($$ini != "")	writeinistr $$ini, currentmacrobasename, "x-wsse", 0;
 
 	escape;
 	moveto #_[0], #_[1];
