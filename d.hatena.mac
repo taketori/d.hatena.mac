@@ -201,17 +201,16 @@ compile_js:
 	}
 
 	// コンパイルに利用するjsc.exeを指定する。
-	$$jsc = getinistr($$1, currentmacrobasename, "jsc") + "\\jsc.exe";
-	openreg "LOCALMACHINE", "SOFTWARE\\Microsoft\\.NETFramework";
-	if(result){
-		$$jsc = getregstr("InstallRoot") + $$jsc;
-		closereg;
-	}else{
-		if(getinistr($$1, currentmacrobasename, "InstallRoot") == "")
-			call runex_to "cmd.exe /C FOR /f \"skip=4 tokens=1,3\" %a IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') DO @ECHO %a = %%b", 3, $$1;
-		$$jsc = getinistr($$1, currentmacrobasename, "InstallRoot") + $$jsc;
+	$$jsc = getinistr($$1, currentmacrobasename, "jsc");
+	// jsc.exeの場所を推定する。
+	if($$jsc == "" || existfile($$jsc) == false){
+		writeinistr $$1, currentmacrobasename, "jsc", 0;
+		// .NET Frameworkのインストールディレクトリを推定する。
+		//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
+		call runex_to "cmd.exe /C FOR /F \"skip=4 tokens=3\" %k IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') DO @FOR /F \"delims= \" %a IN ('dir /O:-N /S /B %k\\jsc.exe') DO @ (echo jsc = \"%a\" && exit )", 3, $$1;
+		$$jsc = getinistr($$1, currentmacrobasename, "jsc");
 	}
-	if(!existfile($$jsc))	return;
+	if(!existfile($$jsc))	return "";
 
 	// コンパイルする。
 	title $mn + "コンパイル中。少々お待ちを。:" +$$2 + " by " + $$jsc;
