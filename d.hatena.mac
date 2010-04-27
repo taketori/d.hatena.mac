@@ -277,6 +277,7 @@ connect_hatena:
 
 	if(300 <= ##status)	call EXIT $$1 + "‚Å‚«‚Ü‚¹‚ñB: " + $$2, $$4;
 	if($$1 == "DELETE")	return ##status;
+	call get_dom ##xmlhttp, $$2;
 
 return ##return;
 
