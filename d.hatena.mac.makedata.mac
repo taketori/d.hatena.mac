@@ -26,6 +26,7 @@ make_data:
 	##dll = ##return;
 
 	// 1行ごとに文章を取得して、そのデータを元に(それっぽかったら)ヘッダにする。
+	title $mn + "データを解析しています。";
 	##i = 1;
 	call set_headers ##dll, ##dom, gettext2(##tc, ##tl, (##tl == ##el) * ##ec, ##tl + (##tl != ##el));
 	while(##return == 0 && ##tl + ##i < ##el){
@@ -67,7 +68,7 @@ get_dom:
 
 	title $mn + "XMLを解析しています : " + $$2;
 	##dom = createobject("Msxml2.DOMDocument.3.0");
-	if(!##dom)	endmacro "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
+	if(!result)	endmacro "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
 	setpropnum ##dom, "async", 0;
 
 	// XML解析
@@ -93,24 +94,38 @@ set_headers:
 	// 各種データを表す正規表現を設定する。
 	$$hateda = "http://d.hatena.ne.jp/";
 	$$id_reg = "[a-zA-Z][\\c-]{1,29}[a-zA-Z\\d]";
-	$$regex = "(?:(?:^(date|updated?):[ \\t]*)"									//#1 ヘッダ
-	              + "((\\d[\\d/-]*\\d)?(T?\\d+[\\d:]*\\d)?)"		//#2 日付
-	        +   "|(?:^(draft|blog):[ \\t]*"											//#3 ヘッダ
-	              + "(\\Q" + $$hateda + "\\E)?"									//#4 サーバ
-	              + "(" + $$id_reg + ")?"												//#5 ID
-	              + "(/atom/(blog|draft)/\\d{8}/\\d{10})?))";		//#6 日時と日記番号
+	$$regex =  "(?:(?:(?:^(date|updated?):[ \\t]*)"                   //#1 ヘッダ
+	                  + "(\\d[\\d/-]+\\dT\\d[\\d:]+\\d|\\d[\\d/-]*\\s*\\d[\\d:]*))"  //#2 日付
+	           + "|(?:^(draft|blog):[ \\t]*"                          //#3 ヘッダ
+	               + "(?:(?:(\\Q" + $$hateda + "\\E)"                 //#4 サーバ
+	                     + "(" + $$id_reg + ")"                       //#5 ID
+	                     + "(/atom/(blog|draft)(/\\d{8}/\\d{10})?))"  //#6 日時と日記番号
+	               +   "|(" + $$id_reg + "))))";                      //#7 ID
 
 	// 条件に合うデータを取得する。
 	##pos = dllfunc(##1, "FindRegular", $$regex, $$3, 0);
 	if(##pos < 0)	return 1;
 	if(0 < dllfunc(##1, "GetLastMatchTagLength", 1)){		// 日付
+		// updatedノードのテキストに、日付らしき部分を代入する。
 		//TODO: 解析を実行ファイルで。
-		setpropstr member(##2, "selectSingleNode", "//updated"), "text", midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 2), dllfunc(##1, "GetLastMatchTagLength", 2));
+		setpropstr member(##2, "selectSingleNode", "//updated"), "text",
+		           midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 2),
+		                  dllfunc(##1, "GetLastMatchTagLength", 2));
+
 	}else{		// if(0 < dllfunc(##1, "GetLastMatchTagLength", 3)){		// draft/blog
-		setpropnum member(##dom, "selectSingleNode", "//publish"), "text", (midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 3), dllfunc(##1, "GetLastMatchTagLength", 3)) == "blog");
-		call make_uri $$header,
-		              midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 5), dllfunc(##1, "GetLastMatchTagLength", 5)),
-		              midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 6), dllfunc(##1, "GetLastMatchTagLength", 6));
+		$$header = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 3),
+		                  dllfunc(##1, "GetLastMatchTagLength", 3));
+		if($$header == "blog"){
+			setpropnum member(##2, "selectSingleNode", "//publish"), "text", 1;
+		}
+		$$user = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 5),
+		                dllfunc(##1, "GetLastMatchTagLength", 5))
+		       + midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 7),
+		                dllfunc(##1, "GetLastMatchTagLength", 7));
+		setpropstr member(##2, "selectSingleNode", "//user"), "text", $$user;
+		call make_uri $$header, $$user,
+		              midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 6),
+		                     dllfunc(##1, "GetLastMatchTagLength", 6));
 		setpropstr member(##2, "selectSingleNode", "//uri"), "text", $$return;
 	}
 
