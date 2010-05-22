@@ -81,7 +81,8 @@ post:
 	call make_data;
 
 	// はてなに接続して投稿する。
-	call connect_hatena "POST", "http://d.hatena.ne.jp/" + $id + "/atom/blog",
+
+	call connect_hatena "POST", getpropstr(member(##return, "selectSingleNode", "//uri"), "text"),
 		member(##return, "xml"), $$1;		//失敗の時はマクロ終了。
 	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
 	<link rel="edit" href="～"/><link rel="alternate" ～/>
@@ -111,17 +112,19 @@ return 0;
 
 mod_entry:
 //arg: $1:iniファイル
-//TODO: 修正する日付を選択範囲から抽出する。
-
-	call get_list $$1, 1, "修正する";
-	$$uri = $$return;
 
 	// 投稿する内容を生成する。
 	call make_data;
+	##dom = ##return;
+	$$uri = getpropstr(member(##return, "selectSingleNode", "//uri"), "text");
+	if($$uri == ""){
+		call get_list $$1, 1, "修正する";
+		$$uri = $$return;
+	}
 
 	question $mn + "修正していいですか。";
 	if(!result)	return;
-	call connect_hatena "PUT", $$uri, member(##return, "xml"), $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "PUT", $$uri, member(##dom, "xml"), $$1;		//失敗の時はマクロ終了。
 	title $mn + "投稿完了";
 	message $mn + "\n" + member(member(##return, "selectSingleNode", "//link"), "getAttribute", "href") + "\nを修正しました。";
 
@@ -130,18 +133,23 @@ return;
 del_entry:
 //arg: $1:iniファイル
 
-	//TODO: 削除するものを、範囲選択、現在のカーソル行からも選べるようにする。
-	call get_list $$1, 1, "削除する";
+	call make_data;
+	$$uri = getpropstr(member(##return, "selectSingleNode", "//uri"), "text");
+	if($$uri == ""){
+		call get_list $$1, 1, "削除する";
+		$$uri = $$return;
+	}
 	title $mn;
-	question $mn + "本当に削除しますか。\n" + $$return;
+	question $mn + "本当に削除しますか。\n" + $$uri;
 	if(!result)	return;
-	call connect_hatena "DELETE", $$return, "", $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "DELETE", $$uri, "", $$1;		//失敗の時はマクロ終了。
 	message $mn + "\n削除しました。";
 
 return 0;
 
 get_list:
 //arg: $1:iniファイル, #2:ページ数, $3:何の対象か
+//ret: $選択したエントリのURI
 
 	// 2ページ以降の時は、前のページへの案内をつける。
 	##i = 0;
@@ -222,31 +230,16 @@ return (result == false) + getresultex(9);
 
 make_data:
 // 編集中の秀丸から必要なデータを抽出し、投稿用のデータにする。
-// データの形式は1行目がタイトル、2行目以降が本文。タイトル行の前にヘッダ行があればそれを使う("^updated:\s*"があればその日付。"^subject:\s*"に該当するものがあればその行をタイトル行にしてそれ以外のを本文に)。
-//arg:
+//arg: --
 //ret: #取得したDOMDocumentオブジェクトの番号
 
-	$$template = currentmacrofilename + ".xml";
-	call get_dom 0, $$template;		// 失敗したらマクロ終了なので##returnには必ず値が入る。
-	##dom = ##return;
+	$$make_data_mac = currentmacrofilename + ".makedata.mac";
+	if(!existfile($$make_data_mac))	call EXIT $$make_data_mac + "がないので続行できません。";
+	execmacro $$make_data_mac;
+	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
+	##ret = val(getresultex(-1));		// 3文字以下ならたぶん取得したDOMDocumentオブジェクトの番号。
 
-	if(selecting || rectselecting){
-		escape;
-		moveto2 seltopcolumn, seltoplineno;
-		if(seltoplineno == selendlineno){
-			setpropstr member(##dom, "selectSingleNode", "//title"), "text", gettext2(seltopcolumn, seltoplineno, selendcolumn, selendlineno);
-		}else{
-			setpropstr member(##dom, "selectSingleNode", "//title"), "text", gettext2(seltopcolumn, seltoplineno, linelen2, seltoplineno);
-			setpropstr member(##dom, "selectSingleNode", "//content"), "text", gettext2(0, seltoplineno + 1, selendcolumn, selendlineno);
-		}
-	}else{
-		gofiletop;
-		setpropstr member(##dom, "selectSingleNode", "//title"), "text", gettext2(column, lineno, linelen2, lineno);
-		gofileend;
-		setpropstr member(##dom, "selectSingleNode", "//content"), "text", gettext2(0, 2, column, lineno);
-	}
-
-return ##return;
+return ##ret;
 
 connect_hatena:
 // XMLHTTPのopenメソッドを呼び出したのち、取得したXMLをDOMDocumentでパースする。
@@ -280,7 +273,7 @@ get_dom:
 
 	title $mn + "XMLを解析しています : " + $$2;
 	##dom = createobject("Msxml2.DOMDocument.3.0");
-	if(!##dom)	call EXIT "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
+	if(!result)	call EXIT "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
 	setpropnum ##dom, "async", 0;
 
 	// XML解析
