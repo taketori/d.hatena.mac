@@ -90,15 +90,7 @@ post:
 	##link = member(##return, "selectSingleNode", "//link");
 	if(member(##link, "getAttribute", "rel") == "edit"){
 		message $mn + "\n" + member(##link, "getAttribute", "href") + "\n‚É“Še‚µ‚Ü‚µ‚½B";
-	}
-	/*
-	##attrs = member(member(##return, "selectSingleNode", "//link"), "attributes");
-	##attr = getcollection(##attrs);
-	if(member(##attr, "nodeName")  == "rel"
-	&& member(##attr, "nodeValue") == "edit"){
-		message $mn + "\n" + member(getcollection(##attrs), "nodeValue") + "\n‚É“Še‚µ‚Ü‚µ‚½B";
-	}*/
-	else{
+	}else{
 		message $mn + "\n" + midstr(member(member(##return, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + "\n‚É“Še‚µ‚Ü‚µ‚½B";
 	}
 
