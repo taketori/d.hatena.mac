@@ -82,7 +82,8 @@ post:
 	##dom = ##return;
 
 	// はてなに接続して投稿する。
-	call connect_hatena "POST", getpropstr(member(##return, "selectSingleNode", "//uri"), "text"), ##dom, $$1;		//失敗の時はマクロ終了。
+	$$uri = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
+	call connect_hatena "POST", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
 	##dom = ##return;
 	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
 	<link rel="edit" href="～"/><link rel="alternate" ～/>
