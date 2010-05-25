@@ -78,6 +78,7 @@ get_dom:
 	title $mn + "XMLを解析しています : " + $$2;
 	##dom = createobject("Msxml2.DOMDocument.3.0");
 	if(!result)	endmacro "Msxml2.DOMDocument.3.0が使えない環境のため、続行できません。";
+	keepobject ##dom, 2/*マクロ終了後に自動開放せず、再利用できる。*/;
 	setpropnum ##dom, "async", 0;
 
 	// XML解析
@@ -88,7 +89,9 @@ get_dom:
 		callmethod ##dom, "load", $$2;
 	}
 	if(member(member(##dom, "parseError"), "errorCode") != 0){
-		endmacro $$2 + " から取得したXMLファイルの解析に失敗しました:\n" + member(member(##dom, "parseError"), "reason");
+		$$msg = $$2 + " から取得したXMLファイルの解析に失敗しました:\n" + member(member(##dom, "parseError"), "reason");
+		releaseobject ##dom;
+		endmacro $$msg;
 	}
 	title $mn + "XMLの解析を完了しました。: " + $$2;
 

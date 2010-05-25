@@ -79,20 +79,20 @@ post:
 
 	// 投稿する内容を生成する。
 	call make_data;
+	##dom = ##return;
 
 	// はてなに接続して投稿する。
-
-	call connect_hatena "POST", getpropstr(member(##return, "selectSingleNode", "//uri"), "text"),
-		member(##return, "xml"), $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "POST", getpropstr(member(##return, "selectSingleNode", "//uri"), "text"), ##dom, $$1;		//失敗の時はマクロ終了。
+	##dom = ##return;
 	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
 	<link rel="edit" href="～"/><link rel="alternate" ～/>
 	要するに、linkノードはrel=editを持つもの → rel=alternateを持つもの の順番である。*/
 	title $mn + "投稿完了";
-	##link = member(##return, "selectSingleNode", "//link");
+	##link = member(##dom, "selectSingleNode", "//link");
 	if(member(##link, "getAttribute", "rel") == "edit"){
 		message $mn + "\n" + member(##link, "getAttribute", "href") + "\nに投稿しました。";
 	}else{
-		message $mn + "\n" + midstr(member(member(##return, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + "\nに投稿しました。";
+		message $mn + "\n" + midstr(member(member(##dom, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + "\nに投稿しました。";
 	}
 
 return;
@@ -102,11 +102,17 @@ get_entry:
 
 	call get_list $$1, 1, "表示する";
 	$$uri = $$return;
-	call connect_hatena "GET", $$uri, "", $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "GET", $$uri, 0, $$1;		//失敗の時はマクロ終了。
+	##dom = ##return;
 	title $mn;
 	question $mn + "\n以下のデータをカーソル部分に挿入します。\n[はい] = 挿入。[いいえ] = ダイアログで表示。\n\n" + $$uri;
-	if(result)	insert $$uri + "\n" + member(member(##return, "selectSingleNode", "//title"), "text") + "\n" + member(member(##return, "selectSingleNode", "//hatena:syntax"), "text");
-	else				message $$uri + "\n" + member(member(##return, "selectSingleNode", "//title"), "text") + "\n" + member(member(##return, "selectSingleNode", "//hatena:syntax"), "text");
+	//TODO: $$uriが/atom/blog/か/atom/draft/かによってヘッダタイトルを変更する。
+	$$msg = "blog: " + $$uri + "\n"
+	      + "updated: " + member(member(##dom, "selectSingleNode", "//updated"), "text") + "\n"
+	      + member(member(##dom, "selectSingleNode", "//title"), "text") + "\n"
+	      + member(member(##dom, "selectSingleNode", "//hatena:syntax"), "text");
+	if(result)	insert $$msg;
+	else				message $$msg;
 
 return 0;
 
@@ -116,7 +122,7 @@ mod_entry:
 	// 投稿する内容を生成する。
 	call make_data;
 	##dom = ##return;
-	$$uri = getpropstr(member(##return, "selectSingleNode", "//uri"), "text");
+	$$uri = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
 	if($$uri == ""){
 		call get_list $$1, 1, "修正する";
 		$$uri = $$return;
@@ -124,7 +130,9 @@ mod_entry:
 
 	question $mn + "修正していいですか。";
 	if(!result)	return;
-	call connect_hatena "PUT", $$uri, member(##dom, "xml"), $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "PUT", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
+
+	// 投稿に成功。
 	title $mn + "投稿完了";
 	message $mn + "\n" + member(member(##return, "selectSingleNode", "//link"), "getAttribute", "href") + "\nを修正しました。";
 
@@ -142,7 +150,7 @@ del_entry:
 	title $mn;
 	question $mn + "本当に削除しますか。\n" + $$uri;
 	if(!result)	return;
-	call connect_hatena "DELETE", $$uri, "", $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "DELETE", $$uri, 0, $$1;		//失敗の時はマクロ終了。
 	message $mn + "\n削除しました。";
 
 return 0;
@@ -160,8 +168,9 @@ get_list:
 
 	// 現在のページの20件を取得する。
 	$$_ = "asdfghjklqwertyuiopvm";		// メニューの頭につけるあれ
-	call connect_hatena "GET", "http://d.hatena.ne.jp/" + $id + "/atom/blog?page=" + str(##2),
-	                    "", $$1;		//失敗の時はマクロ終了。
+	call connect_hatena "GET",
+	                    "http://d.hatena.ne.jp/" + $id + "/atom/blog?page=" + str(##2),
+	                    0, $$1;		//失敗の時はマクロ終了。
 	##entrys = member(##return, "selectNodes", "//entry"); //NOTE: not ##entries
 	##items = member(##entrys, "length");
 	while(##i < ##items + (##2 != 1) ){
@@ -243,19 +252,25 @@ return ##ret;
 
 connect_hatena:
 // XMLHTTPのopenメソッドを呼び出したのち、取得したXMLをDOMDocumentでパースする。
-//arg: $1:接続方法(POST/GET等), $2:接続するURI, $3:sendの引数, $4:INIファイル名
+//arg: $1:接続方法(POST/GET等), $2:接続するURI, #3:XMLHTTPオブジェクトの番号(sendの引数), $4:INIファイル名
 //ret: get_dom(# "Msxml2.DOMDocument.3.0"オブジェクトの番号)。エラーの時はマクロ終了。
+//NOTE: 第3引数のオブジェクトは、この関数で破棄される。
 
 	// XMLを取得。
 	title $mn + $$1 + "のために接続 " + $$2;
 	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
 	if(!##xmlhttp)	##xmlhttp = createobject("Microsoft.XMLHTTP");
-	if(!##xmlhttp)	call EXIT "XMLHTTPオブジェクトにアクセスできません。";
+	if(!##xmlhttp){
+		releaseobject ##3;
+		call EXIT "XMLHTTPオブジェクトにアクセスできません。";
+	}
 
 	callmethod ##xmlhttp, "Open", $$1, $$2, 0;
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
-	callmethod ##xmlhttp, "send", $$3;
+	if(##3)	callmethod ##xmlhttp, "send", member(##3, "xml");
+	else 		callmethod ##xmlhttp, "send", "";
+	releaseobject ##3;
 	##status = getpropnum(##xmlhttp, "status");
 	title $mn + "XMLHTTP result = " + str(##status) + ":" +  getpropstr(##xmlhttp, "statusText");
 
