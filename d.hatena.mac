@@ -235,7 +235,7 @@ make_data:
 
 	$$make_data_mac = currentmacrofilename + ".makedata.mac";
 	if(!existfile($$make_data_mac))	call EXIT $$make_data_mac + "がないので続行できません。";
-	execmacro $$make_data_mac;
+	execmacro $$make_data_mac, $mn, currentmacrofilename;
 	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
 	##ret = val(getresultex(-1));		// 3文字以下ならたぶん取得したDOMDocumentオブジェクトの番号。
 

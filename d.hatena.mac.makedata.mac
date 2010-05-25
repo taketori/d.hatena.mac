@@ -1,12 +1,22 @@
 // d.hatena.mac.makedata.mac
 
+INIT:
 
-call make_data;
+	if(argcount != 2)	endmacro "引数が不正です。";
+	$mn = getarg(0);			// マクロの名前
+	$$cmfn = getarg(1);		// メインマクロのフルパス
+
+MAIN:
+
+	call make_data $$cmfn;
+	title $mn + "データの取得を完了しました。";
+
 endmacro str(##return);
 
 make_data:
 // 編集中の秀丸から必要なデータを抽出し、投稿用のデータにする。
-//set: #取得したDOMDocumentオブジェクトの番号
+//arg: $メインマクロのフルパス
+//ret: #取得したDOMDocumentオブジェクトの番号
 
 	disabledraw;
 	if(selecting || rectselecting){
@@ -19,11 +29,10 @@ make_data:
 		##ec = column; ##el = lineno;
 	}
 
-	$$template = leftstr(currentmacrofilename, strlen(currentmacrofilename) - strlen("makedata.mac")) + ".xml";
-	call get_dom 0, $$template;		// 失敗したらマクロ終了なので##returnには必ず値が入る。
-	##dom = ##return;
 	call load_dll;		// 失敗したらマクロ終了なので##returnには必ず値が入る。
 	##dll = ##return;
+	call get_dom 0, $$1 + ".xml";		// 失敗したらマクロ終了なので##returnには必ず値が入る。
+	##dom = ##return;
 
 	// 1行ごとに文章を取得して、そのデータを元に(それっぽかったら)ヘッダにする。
 	title $mn + "データを解析しています。";
