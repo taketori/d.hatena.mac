@@ -261,7 +261,6 @@ connect_hatena:
 	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
 	if(!##xmlhttp)	##xmlhttp = createobject("Microsoft.XMLHTTP");
 	if(!##xmlhttp){
-		releaseobject ##3;
 		call EXIT "XMLHTTPオブジェクトにアクセスできません。";
 	}
 
@@ -270,7 +269,6 @@ connect_hatena:
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
 	if(##3)	callmethod ##xmlhttp, "send", member(##3, "xml");
 	else 		callmethod ##xmlhttp, "send", "";
-	releaseobject ##3;
 	##status = getpropnum(##xmlhttp, "status");
 	title $mn + "XMLHTTP result = " + str(##status) + ":" +  getpropstr(##xmlhttp, "statusText");
 
