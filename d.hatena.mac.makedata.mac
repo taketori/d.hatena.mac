@@ -22,10 +22,11 @@ make_data:
 	if(selecting || rectselecting){
 		escape;
 		moveto2 seltopcolumn, seltoplineno;
-		##tc = seltopcolumn; ##tl = selendlineno;
+		##tc = seltopcolumn; ##tl = seltoplineno;
 		##ec = selendcolumn; ##el = selendlineno;
 	}else{
 		gofileend;
+		##tl = 1;
 		##ec = column; ##el = lineno;
 	}
 
@@ -43,9 +44,12 @@ make_data:
 		##i = ##i + 1;
 	}
 
-	setpropstr member(##dom, "selectSingleNode", "//title"), "text", gettext2(0, ##tl + ##i, (##tl + ##i == ##el) * ##ec, ##tl + ##i + (##tl + ##i != ##el));
-	##i = ##i + 1;
-	setpropstr member(##dom, "selectSingleNode", "//content"), "text", gettext2(0, ##tl + ##i, ##ec, ##el);
+	##i = ##i - 1;
+	setpropstr member(##dom, "selectSingleNode", "//title"), "text",
+	                  gettext2(0, ##tl + ##i,
+	                           (##tl + ##i == ##el) * ##ec, ##tl + ##i + (##tl + ##i != ##el));
+	setpropstr member(##dom, "selectSingleNode", "//content"), "text",
+	                  gettext2(0, ##tl + ##i + 1, ##ec, ##el);
 	enabledraw;
 
 return ##dom;
