@@ -143,7 +143,7 @@ set_headers:
 		setpropstr member(##2, "selectSingleNode", "//uri"), "text", $$return;
 	}
 
-return;
+return 0;
 
 make_uri:
 //arg: $1:ƒwƒbƒ_, $2:ID, $3:“ú‚Æ“ú‹L”Ô†
