@@ -72,7 +72,7 @@ disp_help:
 
 	message $mn + "\n投稿:\t範囲選択をしておくと、その範囲の1行目をタイトルに、2行目以降を本文にします。\n\t範囲選択していない場合は、編集中の文章すべてを対象にします。\n修正:\t用いるデータは「投稿」と同様です。データは事前に「取得」しておくことをおすすめします。\n\t対象となる日記を選択するメニューを表示します。\n取得/削除:対象となる日記を選択するメニューを表示します。\n\n修正/削除の前には確認のダイアログを表示します。";
 
-return;
+return 0;
 
 post:
 //arg: $1:iniファイル
@@ -96,7 +96,7 @@ post:
 		message $mn + "\n" + midstr(member(member(##dom, "selectSingleNode", "//id"), "text"), strlen("tag:d.hatena.ne.jp,2008:"), ) + "\nに投稿しました。";
 	}
 
-return;
+return 0;
 
 get_entry:
 //arg: $1:iniファイル
@@ -137,7 +137,7 @@ mod_entry:
 	title $mn + "投稿完了";
 	message $mn + "\n" + member(member(##return, "selectSingleNode", "//link"), "getAttribute", "href") + "\nを修正しました。";
 
-return;
+return 0;
 
 del_entry:
 //arg: $1:iniファイル
