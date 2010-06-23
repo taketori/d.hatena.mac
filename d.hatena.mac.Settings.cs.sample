@@ -1,0 +1,54 @@
+// d.hatena.mac.Settings.cs
+//		このファイルには、d.hatena.macの設定(はてなダイアリーのユーザ名とパスワード)を記載しておく。
+//		設定を記載して保存したら、本ファイルのファイル名を「(メインマクロのファイル名).Settings.cs」のように改名する。
+//		(メインマクロのファイル名がd.hatena.macとすると、d.hatena.mac.Settings.csという感じ。)
+//		メインマクロを実行すると、dllとしてコンパイルされ、「マクロ用の実行ファイル」からリンク&参照される。
+
+using System.Collections;
+
+namespace x10d.HidemaruMacro.d_hatena_mac {
+	public class Settings {
+		readonly public static Hashtable hash = new Hashtable ();
+		static Settings() {
+			#region 設定  ///// 設定: ここから /////
+
+			hash[""] = "";		// IDとパスワード
+			/*///////////////////////
+			以下のように、ID名(とそのパスワード)を記載する。IDを複数持っている場合、それぞれの行で個別に書く。
+			行末のセミコロンもお忘れなく。
+			hash["userA"] = "passwordA";  ← id:userA の設定。そのパスワードを記載しておく場合。
+			hash["userB"] = "";           ← id:userB の設定。そのパスワードを記載しない場合。
+			/*///////////////////////
+
+			#endregion  ///// 設定: ここまで /////
+		}
+	}
+///	<remarks>
+///		このファイルには、d.hatena.macの設定(はてなダイアリーのユーザ名とパスワード)を記載しておく。
+///		設定を記載して保存したら、本ファイルのファイル名を「(メインマクロのファイル名).Settings.cs」のように改名する。
+///		(メインマクロのファイル名がd.hatena.macとすると、d.hatena.mac.Settings.csという感じ。)
+///		メインマクロを実行すると、dllとしてコンパイルされ、「マクロ用の実行ファイル」からリンク&参照される。
+///		
+///		手動でコンパイルする場合は、以下のようにする。(%b=このファイルのファイル名)
+///		csc.exe /t:library /w:4 /doc:%b.xml %b
+///	</remarks>
+///	<example>
+///		設定内容を列挙するサンプル。
+///		下記のコードをtest.csなどの名前で保存し、以下のようにコンパイルする。
+///		csc.exe /R:%b.dll /t:winexe /w:4 %b
+///	</example>
+///	<code>
+///		using System;
+///		using System.Collections;
+///		using System.Windows.Forms;
+///		using x10d.HidemaruMacro.d_hatena_mac;
+///
+///		class Test {
+///			static void Main () {
+///				foreach( string key in Settings.hash.Keys ) {
+///					MessageBox.Show(key + " = " + Settings.hash[key]);
+///				}
+///			}
+///		}
+///	</code>
+}
