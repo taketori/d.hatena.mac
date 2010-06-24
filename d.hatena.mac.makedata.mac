@@ -5,6 +5,8 @@ INIT:
 	if(argcount != 2)	endmacro "引数が不正です。";
 	$mn = getarg(0);			// マクロの名前
 	$$cmfn = getarg(1);		// メインマクロのフルパス
+	// .iniファイル中の日付を、念のためあらかじめ消しておく。
+	writeinistr $$cmfn + ".ini", midstr($$cmfn, strrstr($$cmfn, "\\") + 1, ), "date", 0;
 
 MAIN:
 
@@ -42,6 +44,14 @@ make_data:
 	while(##return == 0 && ##tl + ##i < ##el){
 		call set_headers ##dll, ##dom, gettext2(0, ##tl + ##i, 0, ##tl + ##i + 1);
 		##i = ##i + 1;
+	}
+	// 日付を整形する。実行ファイルは、結果を.iniファイルの所定の位置に追記する。
+	##updated = callmethod_returnobj(##dom, "selectSingleNode", "//updated");
+	runex $$1 + ".exe date " + getpropstr(##updated, "text"), 1, 0, "", 0, "", 0, "", 1, "", 2, 0;
+	if(!getresultex(9)){
+		setpropstr ##updated, "text",
+		           getinistr($$1 + ".ini", midstr($$1, strrstr($$1, "\\") + 1, ), "date");
+		writeinistr $$1 + ".ini", midstr($$1, strrstr($$1, "\\") + 1, ), "date", 0;
 	}
 
 	##i = ##i - 1;
@@ -121,11 +131,9 @@ set_headers:
 	if(##pos < 0)	return 1;
 	if(0 < dllfunc(##1, "GetLastMatchTagLength", 1)){		// 日付
 		// updatedノードのテキストに、日付らしき部分を代入する。
-		//TODO: 解析を実行ファイルで。
 		setpropstr member(##2, "selectSingleNode", "//updated"), "text",
 		           midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 2),
 		                  dllfunc(##1, "GetLastMatchTagLength", 2));
-
 	}else{		// if(0 < dllfunc(##1, "GetLastMatchTagLength", 3)){		// draft/blog
 		$$header = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 3),
 		                  dllfunc(##1, "GetLastMatchTagLength", 3));
