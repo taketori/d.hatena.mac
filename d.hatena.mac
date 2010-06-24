@@ -268,6 +268,15 @@ connect_hatena:
 	callmethod ##xmlhttp, "Open", $$1, $$2, 0;
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
+	// キャッシュ対策。
+	callmethod ##xmlhttp, "setRequestHeader", "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT";
+	if(getinistr($$4, currentmacrobasename, "Cache-Control") != ""){
+		callmethod ##xmlhttp, "setRequestHeader", "Cache-Control",
+		           getinistr($$4, currentmacrobasename, "Cache-Control");
+	}
+	if(getininum($$4, currentmacrobasename, "Pragma")){
+		callmethod ##xmlhttp, "setRequestHeader", "Pragma", "no-cache";
+	}
 	if(##3)	callmethod ##xmlhttp, "send", member(##3, "xml");
 	else 		callmethod ##xmlhttp, "send", "";
 	##status = getpropnum(##xmlhttp, "status");

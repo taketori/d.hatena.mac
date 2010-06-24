@@ -1,2 +1,5 @@
 ; d.hatena.mac.ini.sample
 [d.hatena.mac]
+;Cache-Control = "no-cache, no-store, must-revalidate, post-check=0, pre-check=0"
+;Cache-Control = "no-cache"
+;Pragma = 1
