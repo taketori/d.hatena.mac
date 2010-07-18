@@ -28,15 +28,16 @@ setcompatiblemode 0x0002 | 0x0008 | 0x0200;		// 0x002=折りたたみを無視ししてなる
 
 INIT:
 
-	// 設定ファイル、X-WSSEヘッダ生成スクリプトの設置場所を取得する。
+	// 設定ファイル、本マクロ用実行ファイルの設置場所を取得する。
 	$$ini = currentmacrofilename + ".ini";			// 設定ファイル
-	$$wssegen = currentmacrofilename + ".js";		// X-WSSEヘッダ生成スクリプト
-	if(existfile($$ini) == false || existfile($$wssegen) == false){
-		call EXIT "以下のいずれかまたは両方のファイルがないので継続できません。\n\t" + $$ini + " (設定ファイル)\n\t" + $$wssegen + " (X-WSSEヘッダ生成スクリプト)\n配布ファイルに同梱の d.hatena.mac.ini.sample、d.hatena.mac.js.sample をコピー・改名してください";
+	if(!existfile($$ini)){
+		call EXIT "\t" + $$ini + " (設定ファイル)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.ini.sampleをコピーし上記に改名してください";
 	}
-	call compile_js $$ini, $$wssegen;
-	if($$return == "")	call EXIT $$wssegen + "から実行ファイルにコンパイルできませんでした。";
-	$$wssegen = $$return;
+	$$dll_src = currentmacrofilename + ".Settings.cs";
+	$$dll     = currentmacrofilename + ".util.dll";
+	$$exe     = currentmacrofilename + ".exe";
+	call compile_src $$dll_src, $$dll, $$exe;
+	if(##return)	call EXIT $$dll + ", " + $$exe + "のコンパイルを中止しました";
 
 MAIN:
 
@@ -197,37 +198,38 @@ get_list:
 
 return $$return;
 
-compile_js:
-//arg: $1:設定ファイルのフルパス,  $2:X-WSSEヘッダ生成スクリプトのフルパス(存在確認済)
+compile_src:
+//arg: $1:DLLのソース, $2:DLLのフルパス, $3:実行ファイルのフルパス
 //ARG: $mn,  Registory
-//ret: X-WSSEヘッダ生成実行ファイルのフルパス。(コンパイルに失敗したらマクロ終了)
+//ret: #コンパイルの結果(0=成功, 0以外=失敗)
 
-	title $mn + $$2 + "を実行ファイルへコンパイルする準備をしています。";
-	$$wssegen = leftstr($$2, strrstr($$2, ".js")) + ".exe";
-	if(existfile($$wssegen))	call runex_to $$wssegen;		// 引数なしで起動したときはソースコードとの新旧比較。
-	if(##return/*1=実行ファイルの方が新しい*/){
-		title $mn + $$2 + "より実行ファイルの方が新しいので、コンパイルを中断しました。";
-		return $$wssegen;
+	title $mn + "コンパイルする準備をしています。";
+	if(existfile($$1) == false && existfile($$2) == false){
+		call EXIT "\t" + $$dll_src + " (本マクロ用実行ファイルの	DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
+	}
+	if(existfile($$2) && existfile($$3)){
+		call runex_to $$3 + " compare";		// ソースコードとDLLとの新旧比較。
+		if(##return/*1=DLLの方が新しいかソースがない。*/){
+			title $mn + "コンパイルしませんでした。";
+			return 0;
+		}
 	}
 
-	// コンパイルに利用するjsc.exeを指定する。
-	$$jsc = getinistr($$1, currentmacrobasename, "jsc");
-	// jsc.exeの場所を推定する。
-	if($$jsc == "" || existfile($$jsc) == false){
-		writeinistr $$1, currentmacrobasename, "jsc", 0;
-		// .NET Frameworkのインストールディレクトリを推定する。
-		//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
-		call runex_to "cmd.exe /C FOR /F \"skip=4 tokens=3\" %k IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') DO @FOR /F \"delims= \" %a IN ('dir /O:-N /S /B %k\\jsc.exe') DO @ (echo jsc = \"%a\" && exit )", 3, $$1;
-		$$jsc = getinistr($$1, currentmacrobasename, "jsc");
-	}
-	if(!existfile($$jsc))	return "";
+	// .NET Frameworkのインストールディレクトリを推定してコンパイルする。
+	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
+	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
+	call runex_to "cmd.exe /C "
+	// %r=.NET Frameworkのインストールフォルダ を取得して代入する。
+	+ "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
+	// フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
+	+ "DO @ FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
+	// %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
+	+ "DO (%c /warnaserror+ /warn:4 /t:library /out:" + $$2 + " " + $$1 + ") "
+	+ " & %c /warnaserror+ /warn:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	// コンパイルできたらバッチを終了する。
+	+ " & if not errorlevel 1 exit 0)", 7;
 
-	// コンパイルする。
-	title $mn + "コンパイル中。少々お待ちを。:" +$$2 + " by " + $$jsc;
-	call runex_to $$jsc + " /warnaserror+ /warn:0 /out:" + $$wssegen + " " + $$2;
-	if(##return)	call EXIT $$jsc + " を起動して " + $$2 + " をコンパイルする際に失敗しました。";
-
-return $$wssegen;
+return ##return;
 
 runex_to:
 // 引数で指定されたプログラムをrunexを用いて実行し、アウトプット枠に出力する。
