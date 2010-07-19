@@ -249,8 +249,8 @@ return ##ret;
 
 connect_hatena:
 // XMLHTTPのopenメソッドを呼び出したのち、取得したXMLをDOMDocumentでパースする。
-//arg: $1:接続方法(POST/GET等), $2:接続するURI, #3:XMLHTTPオブジェクトの番号(sendの引数), $4:INIファイル名
-//ret: get_dom(# "Msxml2.DOMDocument.3.0"オブジェクトの番号)。エラーの時はマクロ終了。
+//arg: $1:接続方法(POST/GET等), $2:接続するURI, #3:オブジェクトの番号(sendの引数), $4:INIファイル名
+//ret: #:get_dom("Msxml2.DOMDocument.3.0"オブジェクトの番号)。$1が"DELETE"の時はレスポンス番号(200)。エラーの時はマクロ終了。
 //NOTE: 第3引数のオブジェクトは、この関数で破棄される。
 
 	// ユーザ名を設定する。
