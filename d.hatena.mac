@@ -28,22 +28,18 @@ setcompatiblemode 0x0002 | 0x0008 | 0x0200;		// 0x002=折りたたみを無視ししてなる
 
 INIT:
 
-	// 設定ファイル、X-WSSEヘッダ生成スクリプトの設置場所を取得する。
+	// 設定ファイル、本マクロ用実行ファイルの設置場所を取得する。
 	$$ini = currentmacrofilename + ".ini";			// 設定ファイル
-	$$wssegen = currentmacrofilename + ".js";		// X-WSSEヘッダ生成スクリプト
-	if(existfile($$ini) == false || existfile($$wssegen) == false){
-		call EXIT "以下のいずれかまたは両方のファイルがないので継続できません。\n\t" + $$ini + " (設定ファイル)\n\t" + $$wssegen + " (X-WSSEヘッダ生成スクリプト)\n配布ファイルに同梱の d.hatena.mac.ini.sample、d.hatena.mac.js.sample をコピー・改名してください";
+	if(!existfile($$ini)){
+		call EXIT "\t" + $$ini + " (設定ファイル)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.ini.sampleをコピーし上記に改名してください";
 	}
-	call compile_js $$ini, $$wssegen;
-	if($$return == "")	call EXIT $$wssegen + "から実行ファイルにコンパイルできませんでした。";
-	$$wssegen = $$return;
+	$$dll_src = currentmacrofilename + ".Settings.cs";
+	$$dll     = currentmacrofilename + ".util.dll";
+	$$exe     = currentmacrofilename + ".exe";
+	call compile_src $$dll_src, $$dll, $$exe;
+	if(##return)	call EXIT $$dll + ", " + $$exe + "のコンパイルを中止しました";
 
 MAIN:
-
-	// X-WSSEデータを生成する。
-	if($id == "")	$id = input($mn + "\nこのデータを、どのアカウントで投稿しますか。\nアカウント名を入力してください。");
-	call runex_to $$wssegen +  " " + $id, 3, $$ini;
-	if(##return)	call EXIT "X-WSSEの値を" + $$ini + "に追加する際に失敗しました。\nアカウント名か" + $$ini + "の書き込み権限・排他設定を疑ってください。";
 
 	##char = inputchar($mn + "Press [P]ost, [G]et, [M]odify, [D]elete or [H]elp.");
 	if     (##char == 'p')	call post $$ini;
@@ -55,8 +51,6 @@ MAIN:
 EXIT:
 
 	if($$1 != "")	message $mn + "\n" + $$1;
-	if($$2 != "")	$$ini = $$2;
-	if($$ini != "")	writeinistr $$ini, currentmacrobasename, "x-wsse", 0;
 
 	escape;
 	moveto #_[0], #_[1];
@@ -83,6 +77,7 @@ post:
 
 	// はてなに接続して投稿する。
 	$$uri = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
+	if($$uri == "")	$$uri = "http://d.hatena.ne.jp/%user%/atom/blog";
 	call connect_hatena "POST", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
 	##dom = ##return;
 	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
@@ -170,7 +165,7 @@ get_list:
 	// 現在のページの20件を取得する。
 	$$_ = "asdfghjklqwertyuiopvm";		// メニューの頭につけるあれ
 	call connect_hatena "GET",
-	                    "http://d.hatena.ne.jp/" + $id + "/atom/blog?page=" + str(##2),
+	                    "http://d.hatena.ne.jp/%user%/atom/blog?page=" + str(##2),
 	                    0, $$1;		//失敗の時はマクロ終了。
 	##entrys = member(##return, "selectNodes", "//entry"); //NOTE: not ##entries
 	##items = member(##entrys, "length");
@@ -197,37 +192,38 @@ get_list:
 
 return $$return;
 
-compile_js:
-//arg: $1:設定ファイルのフルパス,  $2:X-WSSEヘッダ生成スクリプトのフルパス(存在確認済)
+compile_src:
+//arg: $1:DLLのソース, $2:DLLのフルパス, $3:実行ファイルのフルパス
 //ARG: $mn,  Registory
-//ret: X-WSSEヘッダ生成実行ファイルのフルパス。(コンパイルに失敗したらマクロ終了)
+//ret: #コンパイルの結果(0=成功, 0以外=失敗)
 
-	title $mn + $$2 + "を実行ファイルへコンパイルする準備をしています。";
-	$$wssegen = leftstr($$2, strrstr($$2, ".js")) + ".exe";
-	if(existfile($$wssegen))	call runex_to $$wssegen;		// 引数なしで起動したときはソースコードとの新旧比較。
-	if(##return/*1=実行ファイルの方が新しい*/){
-		title $mn + $$2 + "より実行ファイルの方が新しいので、コンパイルを中断しました。";
-		return $$wssegen;
+	title $mn + "コンパイルする準備をしています。";
+	if(existfile($$1) == false && existfile($$2) == false){
+		call EXIT "\t" + $$dll_src + " (本マクロ用実行ファイルの	DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
+	}
+	if(existfile($$2) && existfile($$3)){
+		call runex_to $$3 + " compare";		// ソースコードとDLLとの新旧比較。
+		if(##return/*1=DLLの方が新しいかソースがない。*/){
+			title $mn + "コンパイルしませんでした。";
+			return 0;
+		}
 	}
 
-	// コンパイルに利用するjsc.exeを指定する。
-	$$jsc = getinistr($$1, currentmacrobasename, "jsc");
-	// jsc.exeの場所を推定する。
-	if($$jsc == "" || existfile($$jsc) == false){
-		writeinistr $$1, currentmacrobasename, "jsc", 0;
-		// .NET Frameworkのインストールディレクトリを推定する。
-		//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
-		call runex_to "cmd.exe /C FOR /F \"skip=4 tokens=3\" %k IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') DO @FOR /F \"delims= \" %a IN ('dir /O:-N /S /B %k\\jsc.exe') DO @ (echo jsc = \"%a\" && exit )", 3, $$1;
-		$$jsc = getinistr($$1, currentmacrobasename, "jsc");
-	}
-	if(!existfile($$jsc))	return "";
+	// .NET Frameworkのインストールディレクトリを推定してコンパイルする。
+	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
+	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
+	call runex_to "cmd.exe /C "
+	// %r=.NET Frameworkのインストールフォルダ を取得して代入する。
+	+ "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
+	// フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
+	+ "DO @ FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
+	// %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
+	+ "DO (%c /warnaserror+ /warn:4 /t:library /out:" + $$2 + " " + $$1 + ") "
+	+ " & %c /warnaserror+ /warn:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	// コンパイルできたらバッチを終了する。
+	+ " & if not errorlevel 1 exit 0)", 7;
 
-	// コンパイルする。
-	title $mn + "コンパイル中。少々お待ちを。:" +$$2 + " by " + $$jsc;
-	call runex_to $$jsc + " /warnaserror+ /warn:0 /out:" + $$wssegen + " " + $$2;
-	if(##return)	call EXIT $$jsc + " を起動して " + $$2 + " をコンパイルする際に失敗しました。";
-
-return $$wssegen;
+return ##return;
 
 runex_to:
 // 引数で指定されたプログラムをrunexを用いて実行し、アウトプット枠に出力する。
@@ -253,19 +249,26 @@ return ##ret;
 
 connect_hatena:
 // XMLHTTPのopenメソッドを呼び出したのち、取得したXMLをDOMDocumentでパースする。
-//arg: $1:接続方法(POST/GET等), $2:接続するURI, #3:XMLHTTPオブジェクトの番号(sendの引数), $4:INIファイル名
-//ret: get_dom(# "Msxml2.DOMDocument.3.0"オブジェクトの番号)。エラーの時はマクロ終了。
+//arg: $1:接続方法(POST/GET等), $2:接続するURI, #3:オブジェクトの番号(sendの引数), $4:INIファイル名
+//ret: #:get_dom("Msxml2.DOMDocument.3.0"オブジェクトの番号)。$1が"DELETE"の時はレスポンス番号(200)。エラーの時はマクロ終了。
 //NOTE: 第3引数のオブジェクトは、この関数で破棄される。
 
-	// XMLを取得。
-	title $mn + $$1 + "のために接続 " + $$2;
-	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
-	if(!##xmlhttp)	##xmlhttp = createobject("Microsoft.XMLHTTP");
-	if(!##xmlhttp){
-		call EXIT "XMLHTTPオブジェクトにアクセスできません。";
+	// ユーザ名を設定する。
+	call set_user ##3;
+	if($$return == "")	call EXIT "ユーザ名かパスワードが指定されていません。";
+
+	// URI中の%user%をユーザ名に置き換える。
+	$$uri = $$2;
+	##p = strstr($$2, "%user%");
+	if(0 < ##p){
+		$$uri = leftstr($$2, ##p) + $$return + midstr($$2, ##p + 6, );
 	}
 
-	callmethod ##xmlhttp, "Open", $$1, $$2, 0;
+	// 接続するための準備。
+	title $mn + $$1 + "のために接続 " + $$uri;
+	##xmlhttp = createobject("Msxml2.XMLHTTP.3.0");
+	if(!result)	call EXIT "Msxml2.XMLHTTP.3.0が使えない環境のため、続行できません。";
+	callmethod ##xmlhttp, "open", $$1, $$uri, 0;
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
 	// キャッシュ対策。
@@ -277,14 +280,20 @@ connect_hatena:
 	if(getininum($$4, currentmacrobasename, "Pragma")){
 		callmethod ##xmlhttp, "setRequestHeader", "Pragma", "no-cache";
 	}
+	// 実際に接続する。
+	title $mn + $$1 + "を試しています。しばらくお待ちください。 " + $$uri;
 	if(##3)	callmethod ##xmlhttp, "send", member(##3, "xml");
 	else 		callmethod ##xmlhttp, "send", "";
+	title $mn + $$1 + "を完了しました。" + $$uri;
+	writeinistr $$4, currentmacrobasename, "x-wsse", 0;
+	writeinistr $$4, currentmacrobasename, "user", 0;
+
+	// 結果判定。
 	##status = getpropnum(##xmlhttp, "status");
 	title $mn + "XMLHTTP result = " + str(##status) + ":" +  getpropstr(##xmlhttp, "statusText");
-
-	if(300 <= ##status)	call EXIT $$1 + "できません。: " + $$2, $$4;
+	if(300 <= ##status)	call EXIT $$1 + "できません。: " + $$uri;
 	if($$1 == "DELETE")	return ##status;
-	call get_dom ##xmlhttp, $$2;
+	call get_dom ##xmlhttp, $$uri;
 
 return ##return;
 
@@ -313,3 +322,26 @@ get_dom:
 
 return ##dom;
 
+set_user:
+// ユーザ名を設定する。パスワードが取得できたらX-WSSEを設定する。
+//arg:DOMDocumentオブジェクトの番号
+//ret:$ユーザ名
+
+	// 既存設定を参照する。
+	title $mn + "ユーザ名・パスワードを設定しています。";
+	$$user = getpropstr(member(##1, "selectSingleNode", "//user"), "text");
+	if($$user == "")	$$user = getstaticvariable("x10d_" + currentmacrobasename + "_user", 0);
+	if($$user == "")	$$user = $id;
+
+	// 実行ファイルでユーザ名を設定/確認する。
+	$$exe = currentmacrofilename +  ".exe";
+	call runex_to $$exe +  " user " + $$user;
+	$$user = getinistr(currentmacrofilename +  ".ini", currentmacrobasename, "user");
+	if(##return){		// パスワードが設定されていない。
+		if($$user == "")	return "";
+		$$pw = input($mn + "\nはてなダイアリーのパスワードを入力してください。\nユーザ名:" +  $$user, "password");
+		if($$pw == "")	return "";
+		call runex_to $$exe +  " user " + $$user + " " + $$pw;
+	}else	setstaticvariable "x10d_" + currentmacrobasename + "_user", $$user, 0;
+
+return $$user;
