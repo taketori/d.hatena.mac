@@ -41,12 +41,13 @@ INIT:
 
 MAIN:
 
-	##char = inputchar($mn + "Press [P]ost, [G]et, [M]odify, [D]elete or [H]elp.");
+	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [P]ost, [G]et, [M]odify, [D]elete or [H]elp.");
 	if     (##char == 'p')	call post $$ini;
 	else if(##char == 'g')	call get_entry $$ini;
 	else if(##char == 'm')	call mod_entry $$ini;
 	else if(##char == 'd')	call del_entry $$ini;
 	else if(##char == 'h')	call disp_help;
+	else 										call disp_help;
 
 EXIT:
 
@@ -64,7 +65,16 @@ endmacro;
 
 disp_help:
 
-	message $mn + "\n投稿:\t範囲選択をしておくと、その範囲の1行目をタイトルに、2行目以降を本文にします。\n\t範囲選択していない場合は、編集中の文章すべてを対象にします。\n修正:\t用いるデータは「投稿」と同様です。データは事前に「取得」しておくことをおすすめします。\n\t対象となる日記を選択するメニューを表示します。\n取得/削除:対象となる日記を選択するメニューを表示します。\n\n修正/削除の前には確認のダイアログを表示します。";
+	message $mn + "\n"
+	      + "使い方:\n"
+	      + "マクロを起動してから、[ ]内のいずれかのキーを押下する。\n"
+	      + "[P]=投稿、 [G]=取得、[M]=修正、[D]=消去、[H]=ヘルプ(この画面の表示)\n"
+	      + "\n"
+	      + "投稿:\t範囲選択をしておくと、その範囲の1行目をタイトルに、2行目以降を本文にします。\n"
+	      + "\t範囲選択していない場合は、編集中の文章すべてを対象にします。\n"
+	      + "修正:\t用いるデータは「投稿」と同様です。データは事前に「取得」しておくことをおすすめします。\n"
+	      + "\n"
+	      + "「date: 日付」「blog: はてなのid」で、日記の日付、投稿に使うユーザ名などを設定できる。(データ形式は適当な日記を取得して確認してください。)\n";
 
 return 0;
 
