@@ -112,8 +112,8 @@ get_entry:
 	##dom = ##return;
 	title $mn;
 	question $mn + "\n以下のデータをカーソル部分に挿入します。\n[はい] = 挿入。[いいえ] = ダイアログで表示。\n\n" + $$uri;
-	//TODO: $$uriが/atom/blog/か/atom/draft/かによってヘッダタイトルを変更する。
-	$$msg = "blog: " + $$uri + "\n"
+	$$msg = midstr("blog: draft:", (strstr($$uri, "/atom/blog/") == -1) * 6, 6)		// $$uri中に"blog"がない場合は、$$uriのヘッダを"draft"にする。
+	      + $$uri + "\n"
 	      + "updated: " + member(member(##dom, "selectSingleNode", "//updated"), "text") + "\n"
 	      + member(member(##dom, "selectSingleNode", "//title"), "text") + "\n"
 	      + member(member(##dom, "selectSingleNode", "//hatena:syntax"), "text");
