@@ -222,7 +222,7 @@ compile_src:
 	// .NET Frameworkのインストールディレクトリを推定してコンパイルする。
 	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
 	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
-	call runex_to "cmd.exe /C "
+	call runex_to getenv("ComSpec") + " /C "
 	// %r=.NET Frameworkのインストールフォルダ を取得して代入する。
 	+ "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
 	// フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
