@@ -221,17 +221,19 @@ compile_src:
 
 	// .NET Frameworkのインストールディレクトリを推定してコンパイルする。
 	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
+	//NOTE: これ以上長いコマンドラインでは、外部プログラムが実行されない。
 	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
 	call runex_to getenv("ComSpec") + " /C "
-	// %r=.NET Frameworkのインストールフォルダ を取得して代入する。
-	+ "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
-	// フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
-	+ "DO @ FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
-	// %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
-	+ "DO (%c /warnaserror+ /warn:4 /t:library /out:" + $$2 + " " + $$1 + ") "
-	+ " & %c /warnaserror+ /warn:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
-	// コンパイルできたらバッチを終了する。
-	+ " & if not errorlevel 1 exit 0)", 7;
+	  // %r=.NET Frameworkのインストールフォルダ を取得して代入する。
+	  + "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
+	  // フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
+	  + "DO @( FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
+	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
+	       + "DO @( %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
+	          + "&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	  // コンパイルできたら結果を表示する。
+	          + "&& exit 0) )",
+	  7, "";
 
 return ##return;
 
