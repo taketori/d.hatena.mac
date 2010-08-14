@@ -37,7 +37,7 @@ INIT:
 	$$dll     = currentmacrofilename + ".util.dll";
 	$$exe     = currentmacrofilename + ".exe";
 	call compile_src $$dll_src, $$dll, $$exe;
-	if(##return)	call EXIT $$dll + ", " + $$exe + "のコンパイルを中止しました";
+	if(##return)	call EXIT "  " + $$dll + "\n  " + $$exe + "\nのいずれかor両方のコンパイルを中止しました。\n　理由はアウトプット枠をご覧ください。たぶん\n・ " + $$dll_src + " にエラーがある。\n・.Net Frameworkがインストールされていないか古い。\nのいずれかです。";
 
 MAIN:
 
@@ -209,12 +209,12 @@ compile_src:
 
 	title $mn + "コンパイルする準備をしています。";
 	if(existfile($$1) == false && existfile($$2) == false){
-		call EXIT "\t" + $$dll_src + " (本マクロ用実行ファイルの	DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
+		call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
 	}
 	if(existfile($$2) && existfile($$3)){
 		call runex_to $$3 + " compare";		// ソースコードとDLLとの新旧比較。
 		if(##return/*1=DLLの方が新しいかソースがない。*/){
-			title $mn + "コンパイルしませんでした。";
+			title $mn + "DLLの方が新しいかDLLのソースがないため、コンパイルしませんでした。";
 			return 0;
 		}
 	}
