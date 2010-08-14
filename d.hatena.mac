@@ -229,7 +229,8 @@ compile_src:
 	  // フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
 	  + "DO @( FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
 	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
-	       + "DO @( %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
+	       + "DO @( echo -- %c --"
+	          +  "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
 	          + "&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
 	  // コンパイルできたら結果を表示する。
 	          + "&& exit 0) )",
