@@ -232,7 +232,7 @@ compile_src:
 	       + "DO @( echo -- %c --"
 	          +  "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
 	          + "&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
-	  // コンパイルできたら結果を表示する。
+	  // コンパイルできたら、その場で直ちに終了する。何かエラーがあれば、(ほかにもインストールされているバージョンがあれば)ループを回す。
 	          + "&& exit 0) )",
 	  7, "";
 
