@@ -73,6 +73,14 @@ class d_hatena_mac {
 		}
 	}
 
+	private static int show_messagebox(string title, string message) {
+		// YesNoCancelメッセージボックスを表示する。
+		//ret: DialogResult列挙体
+		return (int)MessageBox.Show(message, title,
+		                       MessageBoxButtons.YesNoCancel,
+		                       MessageBoxIcon.Question);
+	}
+
 	public static int Main(string[] args) {
 		string exebase, section, user;
 		section = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
@@ -93,6 +101,9 @@ class d_hatena_mac {
 					default:
 						return 1;
 				}
+			case "msgbox":
+				if(args.Length < 3)	return 1;
+				return show_messagebox(args[1], args[2]);
 			case "user":
 				user = "";
 				switch(args.Length){
