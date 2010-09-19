@@ -36,6 +36,9 @@ make_data:
 	##dll = ##return;
 	call get_dom 0, $$1 + ".xml";		// 失敗したらマクロ終了なので##returnには必ず値が入る。
 	##dom = ##return;
+	// URIの初期値を設定する。
+	call make_uri;
+	setpropstr member(##dom, "selectSingleNode", "//uri"), "text", $$return;
 
 	// 1行ごとに文章を取得して、そのデータを元に(それっぽかったら)ヘッダにする。
 	title $mn + "データを解析しています。";
@@ -154,18 +157,15 @@ set_headers:
 return 0;
 
 make_uri:
-//arg: $1:ヘッダ, $2:ID, $3:日時と日記番号
-//ret:
+//arg: $1:ヘッダ, $2:ID, $3:/atom/～以降
+//ret: $ URI
 
+	if($$1 == "")	$$1 = "blog";		// デフォルトはブログ。
 	$$hateda = "http://d.hatena.ne.jp/";
 	$$id = $$2;
-	if($$id == ""){
-		$$id = input("IDを入力してね。");
-	}
+	if($$id == "")	$$id = "%user%";
 	$$entry = $$3;
-	if($$entry == ""){
-		$$entry = "/atom/" + $$1;
-	}
+	if($$3 == "")	$$entry = "/atom/" + $$1;
 
 return $$hateda + $$id + $$entry;
 
