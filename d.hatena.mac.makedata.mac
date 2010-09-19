@@ -138,19 +138,22 @@ set_headers:
 		           midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 2),
 		                  dllfunc(##1, "GetLastMatchTagLength", 2));
 	}else{		// if(0 < dllfunc(##1, "GetLastMatchTagLength", 3)){		// draft/blog
-		$$header = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 3),
-		                  dllfunc(##1, "GetLastMatchTagLength", 3));
-		if($$header == "blog"){
-			setpropnum member(##2, "selectSingleNode", "//publish"), "text", 1;
-		}
 		$$user = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 5),
 		                dllfunc(##1, "GetLastMatchTagLength", 5))
 		       + midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 7),
 		                dllfunc(##1, "GetLastMatchTagLength", 7));
 		setpropstr member(##2, "selectSingleNode", "//user"), "text", $$user;
-		call make_uri $$header, $$user,
-		              midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 6),
-		                     dllfunc(##1, "GetLastMatchTagLength", 6));
+		$$header = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 3),
+		                  dllfunc(##1, "GetLastMatchTagLength", 3));
+		$$member = midstr($$3, dllfunc(##1, "GetLastMatchTagPosition", 6),
+		                  dllfunc(##1, "GetLastMatchTagLength", 6));
+		// URI部分の情報。
+		//1=メンバURI(コレクションではない)。2=コレクション名がヘッダと同一。4=現在のヘッダがdraft
+		##uri_info = (0 < strlen($$member))
+		           + 2 * (leftstr($$member, strlen("/atom/" + $$header)) == "/atom/" + $$header)
+		           + 4 * ($$header == "draft");
+		setpropnum member(##2, "selectSingleNode", "//publish"), "text", ##uri_info;
+		call make_uri $$header, $$user, $$member;
 		setpropstr member(##2, "selectSingleNode", "//uri"), "text", $$return;
 	}
 
