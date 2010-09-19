@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<entry xmlns="http://purl.org/atom/ns#">
+<entry xmlns="http://www.w3.org/2005/Atom">
   <title></title>
-  <content type="text/plain">
-  </content>
+  <content type="text/plain"></content>
   <user></user>
   <uri></uri>
   <publish></publish>
