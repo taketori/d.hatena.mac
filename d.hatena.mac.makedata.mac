@@ -47,7 +47,7 @@ make_data:
 	}
 	// 日付を整形する。実行ファイルは、結果を.iniファイルの所定の位置に追記する。
 	##updated = callmethod_returnobj(##dom, "selectSingleNode", "//updated");
-	runex $$1 + ".exe date " + getpropstr(##updated, "text"), 1, 0, "", 0, "", 0, "", 1, "", 2, 0;
+	runex $$1 + ".exe date \"" + getpropstr(##updated, "text") + "\"", 1, 0, "", 0, "", 0, "", 1, "", 2, 0;
 	if(!getresultex(9)){
 		setpropstr ##updated, "text",
 		           getinistr($$1 + ".ini", midstr($$1, strrstr($$1, "\\") + 1, ), "date");
