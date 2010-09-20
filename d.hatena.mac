@@ -132,13 +132,19 @@ get_entry:
 	$$uri = $$return;
 	call connect_hatena "GET", $$uri, 0, $$1;		//失敗の時はマクロ終了。
 	##dom = ##return;
+	##is_draft = (strstr($$uri, "/atom/blog/") == -1);		//draft=1, blog=0
+
 	title $mn;
 	question $mn + "\n以下のデータをカーソル部分に挿入します。\n[はい] = 挿入。[いいえ] = ダイアログで表示。\n\n" + $$uri;
-	$$msg = midstr("blog: draft:", (strstr($$uri, "/atom/blog/") == -1) * 6, 6)		// $$uri中に"blog"がない場合は、$$uriのヘッダを"draft"にする。
+	$$msg = midstr("blog: draft:", ##is_draft * 6, ##is_draft + 5)		// $$uri中に"blog"がない場合は、$$uriのヘッダを"draft"にする。
 	      + $$uri + "\n"
 	      + "updated: " + member(member(##dom, "selectSingleNode", "//updated"), "text") + "\n"
-	      + member(member(##dom, "selectSingleNode", "//title"), "text") + "\n"
-	      + member(member(##dom, "selectSingleNode", "//hatena:syntax"), "text");
+	      + getpropstr(member(##dom, "selectSingleNode", "//title"), "text") + "\n";
+	if(##is_draft){
+		$$msg = $$msg + getpropstr(member(##dom, "selectSingleNode", "//content"), "text");
+	}else{
+		$$msg = $$msg + getpropstr(member(##dom, "selectSingleNode", "//hatena:syntax"), "text");
+	}
 	if(result)	insert $$msg;
 	else				message $$msg;
 
@@ -200,7 +206,7 @@ del_entry:
 return 0;
 
 get_list:
-//arg: $1:iniファイル, #2:ページ数, $3:何の対象か
+//arg: $1:iniファイル, #2:ページ数, $3:何の対象か, #4:下書きか(0=日記, 1=下書き)
 //ret: $選択したエントリのURI
 
 	// 2ページ以降の時は、前のページへの案内をつける。
@@ -213,7 +219,7 @@ get_list:
 	// 現在のページの20件を取得する。
 	$$_ = "asdfghjklqwertyuiopvm";		// メニューの頭につけるあれ
 	call connect_hatena "GET",
-	                    "http://d.hatena.ne.jp/%user%/atom/blog?page=" + str(##2),
+	                    "http://d.hatena.ne.jp/%user%/atom/" + midstr("blogdraft", ##4 * 4, ##4 + 4) + "?page=" + str(##2),
 	                    0, $$1;		//失敗の時はマクロ終了。
 	##entrys = member(##return, "selectNodes", "//entry"); //NOTE: not ##entries
 	##items = member(##entrys, "length");
@@ -230,12 +236,18 @@ get_list:
 		##i = ##i + 1;
 	}
 
+	// 日記と下書きの表示変更
+	$$menu[##i] = "\x01";
+	$$menu[##i + 1] = "&z 日記 <--> 下書き";
+	##i = ##i + 2;
+
 	// メニューを表示する。
 	title $mn + $$3 + "日記のタイトルをメニューの中から選択してください。";
 	menuarray $$menu, ##i;
-	if(result == 0)											call EXIT;
-	if(result == 1 && ##2 != 1)		call get_list $$1, ##2 - 1;
-	if(result == 21 + (##2 != 1))	call get_list $$1, ##2 + 1;
+	if(result == 0)													call EXIT;															// cancel
+	if(result == 1       && 1 < ##2)				call get_list $$1, ##2 - 1, $$3, ##4;		// 前の～
+	if(result == ##i - 2 && ##items == 20)	call get_list $$1, ##2 + 1, $$3, ##4;		// 次の～
+	if(result == ##i)												call get_list $$1, 1,       $$3, ##4^1;	// 日記<-->下書き
 	else return $$uri[result - 1];
 
 return $$return;
