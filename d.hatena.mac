@@ -179,7 +179,7 @@ get_list:
 	                    0, $$1;		//失敗の時はマクロ終了。
 	##entrys = member(##return, "selectNodes", "//entry"); //NOTE: not ##entries
 	##items = member(##entrys, "length");
-	while(##i < ##items + (##2 != 1) ){
+	while(##i < ##items + (1 < ##2)){
 		##entry = getcollection(##entrys);
 		$$menu[##i] = "&" + midstr($$_, ##i, 1) + " " + member(member(##entry, "selectSingleNode", "title"), "text");
 		$$uri[##i] = member(member(##entry, "selectSingleNode", "link"), "getAttribute", "href");
