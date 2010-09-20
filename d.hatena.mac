@@ -83,12 +83,34 @@ post:
 
 	// 投稿する内容を生成する。
 	call make_data;
-	##dom = ##return;
+	##dom  = ##return;
+	$$uri  = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
+	##info = val(getpropstr(member(##dom, "selectSingleNode", "//publish"), "text"));
+
+	// メンバURIが記載してあったなら、それを上書きするか確認。
+	$$req = "POST";
+	if(##info & 1/*メンバURI*/){
+		if(##info & 2 == 0/*コレクション名とヘッダに相違*/){
+			if(##info & 4)	message $mn + "ご所望の動作は、まだ実装されてないのでできません。";
+			else						message $mn + "ご所望の動作は、[修正]を選んだらできます。";
+			return 0;
+		}
+		// メンバURIなのに「投稿」の時。
+		call runex_to currentmacrofilename + ".exe msgbox \"" + $mn + "\" "
+		            + "\"URIの記事を、現在の内容に置き換えますか。\n"
+		            + "[はい]=上書き　[いいえ]=新規投稿　[キャンセル]=接続しない\"";
+		if(##return == 6/*Yes*/){
+			$$req = "PUT";
+		}else if(##return == 7/*No*/){
+			$$uri = leftstr($$uri, strrstr($$uri, "/atom/"))
+			      + "/atom/" + midstr("blogdraft", (##info & 4), (##info & 4)/4 + 4);
+		}else{		//Cancel
+			return 0;
+		}
+	}
 
 	// はてなに接続して投稿する。
-	$$uri = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
-	if($$uri == "")	$$uri = "http://d.hatena.ne.jp/%user%/atom/blog";
-	call connect_hatena "POST", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
+	call connect_hatena $$req, $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
 	##dom = ##return;
 	/*NOTE: このマクロでは以下のような形式であることを前提に作っている。
 	<link rel="edit" href="～"/><link rel="alternate" ～/>
@@ -129,13 +151,29 @@ mod_entry:
 	call make_data;
 	##dom = ##return;
 	$$uri = getpropstr(member(##dom, "selectSingleNode", "//uri"), "text");
-	if($$uri == ""){
-		call get_list $$1, 1, "修正する";
-		$$uri = $$return;
-	}
+	##info = val(getpropstr(member(##dom, "selectSingleNode", "//publish"), "text"));
 
-	question $mn + "修正していいですか。";
-	if(!result)	return;
+	if(##info != 1){
+		if((##info & 1) == 0){
+			call get_list $$1, 1, "修正する", (##info & 4)/4;
+			$$uri = $$return;
+		}
+		question $mn + "修正していいですか。";
+		if(!result)	return;
+	}else{
+		call runex_to currentmacrofilename + ".exe msgbox \"" + $mn + "\" "
+		              + "\"URIの記事を現在編集中の内容で上書き後、日記として公開しますか。\n"
+		              + "[はい]=上書きして公開　[いいえ]=サーバの内容で公開　[キャンセル]=接続中止\"";
+		if(##return == 6/* Yes */){
+			setpropnum member(##dom, "selectSingleNode", "//publish"), "text", 3;
+			call connect_hatena "PUT", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
+			setpropnum member(##dom, "selectSingleNode", "//publish"), "text", 1;
+		}else if(##return == 7/* No */){
+			// 何もしない。
+		}else{	/* Cancel */
+			return 0;
+		}
+	}
 	call connect_hatena "PUT", $$uri, ##dom, $$1;		//失敗の時はマクロ終了。
 
 	// 投稿に成功。
@@ -149,7 +187,7 @@ del_entry:
 
 	call make_data;
 	$$uri = getpropstr(member(##return, "selectSingleNode", "//uri"), "text");
-	if($$uri == ""){
+	if((##uri & 1) == 0){
 		call get_list $$1, 1, "削除する";
 		$$uri = $$return;
 	}
@@ -281,6 +319,11 @@ connect_hatena:
 	callmethod ##xmlhttp, "open", $$1, $$uri, 0;
 	callmethod ##xmlhttp, "setRequestHeader", "X-WSSE", getinistr($$4, currentmacrobasename, "x-wsse");
 	callmethod ##xmlhttp, "setRequestHeader", "Content-Type", "text/xml";
+	// 下書きエントリーの日記への公開。
+	if($$1 == "PUT"
+	&& val(getpropstr(member(##3, "selectSingleNode", "//publish"), "text")) == 1){
+		callmethod ##xmlhttp, "setRequestHeader", "X-HATENA-PUBLISH", 1;
+	}
 	// キャッシュ対策。
 	callmethod ##xmlhttp, "setRequestHeader", "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT";
 	if(getinistr($$4, currentmacrobasename, "Cache-Control") != ""){
