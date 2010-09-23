@@ -37,7 +37,7 @@ INIT:
 	$$dll     = currentmacrofilename + ".util.dll";
 	$$exe     = currentmacrofilename + ".exe";
 	call compile_src $$dll_src, $$dll, $$exe;
-	if(##return)	call EXIT $$dll + ", " + $$exe + "のコンパイルを中止しました";
+	if(##return)	call EXIT "  " + $$dll + "\n  " + $$exe + "\nのいずれかor両方のコンパイルを中止しました。\n　理由はアウトプット枠をご覧ください。たぶん\n・ " + $$dll_src + " にエラーがある。\n・.Net Frameworkがインストールされていないか古い。\nのいずれかです。";
 
 MAIN:
 
@@ -262,29 +262,32 @@ compile_src:
 
 	title $mn + "コンパイルする準備をしています。";
 	if(existfile($$1) == false && existfile($$2) == false){
-		call EXIT "\t" + $$dll_src + " (本マクロ用実行ファイルの	DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
+		call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
 	}
 	if(existfile($$2) && existfile($$3)){
 		call runex_to $$3 + " compare";		// ソースコードとDLLとの新旧比較。
 		if(##return/*1=DLLの方が新しいかソースがない。*/){
-			title $mn + "コンパイルしませんでした。";
+			title $mn + "DLLの方が新しいかDLLのソースがないため、コンパイルしませんでした。";
 			return 0;
 		}
 	}
 
 	// .NET Frameworkのインストールディレクトリを推定してコンパイルする。
 	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
+	//NOTE: これ以上長いコマンドラインでは、外部プログラムが実行されない。
 	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
-	call runex_to "cmd.exe /C "
-	// %r=.NET Frameworkのインストールフォルダ を取得して代入する。
-	+ "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
-	// フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
-	+ "DO @ FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
-	// %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
-	+ "DO (%c /warnaserror+ /warn:4 /t:library /out:" + $$2 + " " + $$1 + ") "
-	+ " & %c /warnaserror+ /warn:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
-	// コンパイルできたらバッチを終了する。
-	+ " & if not errorlevel 1 exit 0)", 7;
+	call runex_to getenv("ComSpec") + " /C "
+	  // %r=.NET Frameworkのインストールフォルダ を取得して代入する。
+	  + "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
+	  // フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
+	  + "DO @( FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
+	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
+	       + "DO @( echo -- %c --"
+	          +  "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
+	          + "&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	  // コンパイルできたら、その場で直ちに終了する。何かエラーがあれば、(ほかにもインストールされているバージョンがあれば)ループを回す。
+	          + "&& exit 0) )",
+	  7, "";
 
 return ##return;
 
