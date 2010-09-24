@@ -215,7 +215,7 @@ get_list:
 	// 2ページ以降の時は、前のページへの案内をつける。
 	##i = 0;
 	if(1 < ##2){
-		$$menu[##i] = "&b <--- 前の20件 ---";
+		$$menu[##i] = "(&b) <--- 前の20件 ---";
 		##i = ##i + 1;
 	}
 
@@ -228,20 +228,21 @@ get_list:
 	##items = member(##entrys, "length");
 	while(##i < ##items + (1 < ##2)){
 		##entry = getcollection(##entrys);
-		$$menu[##i] = "&" + midstr($$_, ##i, 1) + " " + member(member(##entry, "selectSingleNode", "title"), "text");
+		$$menu[##i] = "(&" + midstr($$_, ##i, 1) + ") "
+		            + member(member(##entry, "selectSingleNode", "title"), "text");
 		$$uri[##i] = member(member(##entry, "selectSingleNode", "link"), "getAttribute", "href");
 		##i = ##i + 1;
 	}
 
 	// このページで20件あるときは次のページもあると見なして、次のページへの案内をつける。
 	if(##items == 20){
-		$$menu[##i] = "&n --- 次の20件 --->";
+		$$menu[##i] = "(&n) --- 次の20件 --->";
 		##i = ##i + 1;
 	}
 
 	// 日記と下書きの表示変更
 	$$menu[##i] = "\x01";
-	$$menu[##i + 1] = "&z 日記 <--> 下書き";
+	$$menu[##i + 1] = "(&z) 日記 <--> 下書き";
 	##i = ##i + 2;
 
 	// メニューを表示する。
