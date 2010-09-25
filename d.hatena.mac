@@ -261,14 +261,20 @@ compile_src:
 //ret: #コンパイルの結果(0=成功, 0以外=失敗)
 
 	title $mn + "コンパイルする準備をしています。";
-	if(existfile($$1) == false && existfile($$2) == false){
-		call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
-	}
-	if(existfile($$2) && existfile($$3)){
-		call runex_to $$3 + " compare";		// ソースコードとDLLとの新旧比較。
-		if(##return/*1=DLLの方が新しいかソースがない。*/){
+	if(existfile($$2)){
+		##objFSO = createobject("Scripting.FileSystemObject");
+		$$src = getpropstr(member(##objFSO, "GetFile", $$1), "DateLastModified");
+		$$dll = getpropstr(member(##objFSO, "GetFile", $$2), "DateLastModified");
+		if(val(midstr($$src, 0, 2) + midstr($$src, 3, 2) + midstr($$src, 6, 2)
+		      + midstr($$src, 13, 2) + midstr($$src, 16, 2) + midstr($$src, 19, 2))
+		  < val(midstr($$dll, 0, 2) + midstr($$dll, 3, 2) + midstr($$dll, 6, 2)
+		       + midstr($$dll, 13, 2) + midstr($$dll, 16, 2) + midstr($$dll, 19, 2))){
 			title $mn + "DLLの方が新しいかDLLのソースがないため、コンパイルしませんでした。";
 			return 0;
+		}
+	}else{
+		if(!existfile($$1)){
+			call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
 		}
 	}
 
