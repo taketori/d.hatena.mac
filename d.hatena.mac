@@ -41,12 +41,15 @@ INIT:
 
 MAIN:
 
-	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [p]ost, [g]et, [m]odify, [d]elete or [h]elp.");
+	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [p]ost, [g]et, [m]odify, [d]elete, [h]elp or [q]/[Esc] to quit.");
 	if     (##char == 'p')	call post $$ini;
 	else if(##char == 'g')	call get_entry $$ini;
 	else if(##char == 'm')	call mod_entry $$ini;
 	else if(##char == 'd')	call del_entry $$ini;
 	else if(##char == 'h')	call disp_help;
+	else if(##char == 'q' || ##char == 27/*Esc*/){
+		call EXIT;
+	}
 	else 										call disp_help;
 
 EXIT:
