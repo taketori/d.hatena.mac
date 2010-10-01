@@ -470,7 +470,7 @@ ins_tags:
 	enabledraw;
 	endgroupundo;
 
-	#_[0] = column;
-	#_[1] = lineno;
+	#_[0] = x;
+	#_[1] = y;
 
 return 0;
