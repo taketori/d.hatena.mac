@@ -407,7 +407,7 @@ set_user:
 
 	// 既存設定を参照する。
 	title $mn + "ユーザ名・パスワードを設定しています。";
-	$$user = getpropstr(member(##1, "selectSingleNode", "//user"), "text");
+	if(##1)						$$user = getpropstr(member(##1, "selectSingleNode", "//user"), "text");
 	if($$user == "")	$$user = getstaticvariable("x10d_" + currentmacrobasename + "_user", 0);
 	if($$user == "")	$$user = $id;
 
