@@ -428,7 +428,8 @@ ins_tags:
 // タグを挿入する。
 //arg: $1:INIファイル
 
-	$$dic = currentmacrofilename + ".tags.list";
+	call set_user 0, 0;
+	$$dic = currentmacrofilename + leftstr(".", strlen($$return)) + $$return + ".tags.list";
 	title $mn + "タグ補完中～辞書: " + $$dic;
 	begingroupundo;
 	// 補完できないのであえて [ を挿入する。
