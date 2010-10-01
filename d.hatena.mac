@@ -265,10 +265,12 @@ compile_src:
 		##objFSO = createobject("Scripting.FileSystemObject");
 		$$src = getpropstr(member(##objFSO, "GetFile", $$1), "DateLastModified");
 		$$dll = getpropstr(member(##objFSO, "GetFile", $$2), "DateLastModified");
-		if(val(midstr($$src, 0, 2) + midstr($$src, 3, 2) + midstr($$src, 6, 2)
-		      + midstr($$src, 13, 2) + midstr($$src, 16, 2) + midstr($$src, 19, 2))
+		if(existfile($$3)
+		&& strlen($$dll)
+		&&  val(midstr($$src, 0, 2) + midstr($$src, 3, 2) + midstr($$src, 6, 2)
+		       + midstr($$src, 13, 2) + midstr($$src, 16, 2))
 		  < val(midstr($$dll, 0, 2) + midstr($$dll, 3, 2) + midstr($$dll, 6, 2)
-		       + midstr($$dll, 13, 2) + midstr($$dll, 16, 2) + midstr($$dll, 19, 2))){
+		       + midstr($$dll, 13, 2) + midstr($$dll, 16, 2))){
 			title $mn + "DLLの方が新しいかDLLのソースがないため、コンパイルしませんでした。";
 			return 0;
 		}
