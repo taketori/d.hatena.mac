@@ -327,7 +327,7 @@ connect_hatena:
 //NOTE: 第3引数のオブジェクトは、この関数で破棄される。
 
 	// ユーザ名を設定する。
-	call set_user ##3;
+	call set_user ##3, 1;
 	if($$return == "")	call EXIT "ユーザ名かパスワードが指定されていません。";
 
 	// URI中の%user%をユーザ名に置き換える。
@@ -402,7 +402,7 @@ return ##dom;
 
 set_user:
 // ユーザ名を設定する。パスワードが取得できたらX-WSSEを設定する。
-//arg:DOMDocumentオブジェクトの番号
+//arg: #1:DOMDocumentオブジェクトの番号, #2:パスワードが必要か(0=不要, 0以外=必要)
 //ret:$ユーザ名
 
 	// 既存設定を参照する。
@@ -415,7 +415,7 @@ set_user:
 	$$exe = currentmacrofilename +  ".exe";
 	call runex_to $$exe +  " user " + $$user;
 	$$user = getinistr(currentmacrofilename +  ".ini", currentmacrobasename, "user");
-	if(##return){		// パスワードが設定されていない。
+	if(##return * ##2){		// パスワードが必要なのに設定されていない。
 		if($$user == "")	return "";
 		$$pw = input($mn + "\nはてなダイアリーのパスワードを入力してください。\nユーザ名:" +  $$user, "password");
 		if($$pw == "")	return "";
