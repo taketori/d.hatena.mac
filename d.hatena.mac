@@ -41,11 +41,12 @@ INIT:
 
 MAIN:
 
-	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [p]ost, [g]et, [m]odify, [d]elete or [h]elp.");
+	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [p]ost, [g]et, [m]odify, [d]elete, [t]ags or [h]elp.");
 	if     (##char == 'p')	call post $$ini;
 	else if(##char == 'g')	call get_entry $$ini;
 	else if(##char == 'm')	call mod_entry $$ini;
 	else if(##char == 'd')	call del_entry $$ini;
+	else if(##char == 't')	call ins_tags $$ini;
 	else if(##char == 'h')	call disp_help;
 	else 										call disp_help;
 
@@ -422,3 +423,54 @@ set_user:
 	}else	setstaticvariable "x10d_" + currentmacrobasename + "_user", $$user, 0;
 
 return $$user;
+
+ins_tags:
+// タグを挿入する。
+//arg: $1:INIファイル
+
+	$$dic = currentmacrofilename + ".tags.list";
+	title $mn + "タグ補完中～辞書: " + $$dic;
+	begingroupundo;
+	// 補完できないのであえて [ を挿入する。
+	##undo = 0;
+	if(column == 0
+	|| gettext2(column - 1, lineno, column, lineno) == "]"){
+		insert "[";
+		##undo = 1;
+	}
+	autocomplete -1, 0x2 | 0x4,
+	             0x4 | 0x20 | 0x000 | 0x1000 | 0x2000 | 0x4000 | 0x8000 | 0x20000,		//NOTE: 0x1, 0x2, 0x100000はNG。
+	             $$dic;
+	if(!result){
+		if(##undo)	undo;
+		endgroupundo;
+		return 1;
+	}
+
+	##bfr = (result & 0xffff0000) / 0x10000;
+	##aft = result & 0x0000ffff;
+	$$tag = gettext2(column - ##bfr, lineno, column - ##aft, lineno);
+	##sp  = strstr($$tag, " ");
+	// スペース以降を削除する。候補を選んで続けて入力した文字を維持
+	if(0 < ##sp){
+		$$tag = leftstr($$tag, ##sp);
+	}
+	// 単語の途中から補完すると記号が重なるのを是正。
+	if(gettext2(column - ##bfr - 1, lineno, column - ##bfr, lineno) == leftstr($$tag, 1)){
+		$$tag = midstr($$tag, 1, );
+	}
+	$$tag = $$tag + gettext2(column - ##aft, lineno, column, lineno);
+	// 補完した内容を削除する。
+	disabledraw;
+	beginsel;
+	moveto2 column - ##bfr, lineno;
+	delete;
+	insert $$tag;
+	endsel;
+	enabledraw;
+	endgroupundo;
+
+	#_[0] = column;
+	#_[1] = lineno;
+
+return 0;
