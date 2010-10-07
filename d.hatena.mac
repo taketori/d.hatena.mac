@@ -436,5 +436,6 @@ ins_notations:
 	}
 	execmacro $$sub_mac, $mn, currentmacrofilename;
 	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
+	#_[0] = x;	#_[1] = y;
 
 return 0;
