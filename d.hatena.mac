@@ -430,7 +430,10 @@ ins_notations:
 //ret: (失敗したら終了)
 
 	$$sub_mac = currentmacrofilename + ".insnotations.mac";
-	if(!existfile($$sub_mac))	call EXIT $$sub_mac + "がないので続行できません。";
+	if(!existfile($$sub_mac)){
+		if(existfile($$sub_mac + ".sample"))	$$sub_mac = $$sub_mac + ".sample";
+		else	call EXIT $$sub_mac + "がないので続行できません。";
+	}
 	execmacro $$sub_mac, $mn, currentmacrofilename;
 	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
 
