@@ -425,7 +425,7 @@ set_user:
 return $$user;
 
 ins_notations:
-// はてな記法を入力するためのマクロ生成する。
+// はてな記法を入力する。
 //arg: --
 //ret: (失敗したら終了)
 
