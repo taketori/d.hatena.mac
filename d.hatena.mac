@@ -56,6 +56,8 @@ EXIT:
 
 	escape;
 	moveto #_[0], #_[1];
+	setsearch $_[0], #_[2];
+	setsearchhist 0, $_[1];
 	if( #_[5] )	overwriteswitch;
 	if( #_[6] )	browsemodeswitch;
 	if( #_[7] )	readonlyswitch;
