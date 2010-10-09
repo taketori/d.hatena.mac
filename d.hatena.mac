@@ -436,7 +436,10 @@ ins_notations:
 		if(existfile($$sub_mac + ".sample"))	$$sub_mac = $$sub_mac + ".sample";
 		else	call EXIT $$sub_mac + "がないので続行できません。";
 	}
+
+	$$r = replacebuffer;
 	execmacro $$sub_mac, $mn, currentmacrofilename;
+	setreplace $$r;
 	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
 	#_[0] = x;	#_[1] = y;
 
