@@ -117,6 +117,23 @@ gen_func:
 
 return "";
 
+open_http:
+// WinHTTP.HTTPRequestのopenメソッドを呼び出す。
+//arg: $1:接続方法(POST/GET), $2:URL
+//ARG: $mn
+//ret: 0=何かエラー。0以外=WinHttpRequestで取得したオブジェクトの番号。
+
+	title $mn + $$1 + "のために接続 " + $$2;
+	##objHttp = createobject("WinHttp.WinHttpRequest.5.1");
+	if(!##objHttp)	##objHttp = createobject("WinHttp.WinHttpRequest");
+	if(!##objHttp)	return 0;
+
+	callmethod ##objHttp, "Open", $$1, $$2, 0;
+	callmethod ##objHttp, "Send";
+	title $mn + "WinHttp : " + getpropstr(##objHttp, "StatusText");
+
+return ##objHttp * (getpropnum(##objHttp, "Status") == 200);
+
 ins_str:
 // 文字列挿入を実際に行う。
 //arg: #1:WinHttpRequestで取得したオブジェクトの番号
@@ -168,23 +185,6 @@ ins_str:
 	     + "return ##mi;\n";/* 関数終了(return) */
 
 return;
-
-open_http:
-// WinHTTP.HTTPRequestのopenメソッドを呼び出す。
-//arg: $1:接続方法(POST/GET), $2:URL
-//ARG: $mn
-//ret: 0=何かエラー。0以外=WinHttpRequestで取得したオブジェクトの番号。
-
-	title $mn + $$1 + "のために接続 " + $$2;
-	##objHttp = createobject("WinHttp.WinHttpRequest.5.1");
-	if(!##objHttp)	##objHttp = createobject("WinHttp.WinHttpRequest");
-	if(!##objHttp)	return 0;
-
-	callmethod ##objHttp, "Open", $$1, $$2, 0;
-	callmethod ##objHttp, "Send";
-	title $mn + "WinHttp : " + getpropstr(##objHttp, "StatusText");
-
-return ##objHttp * (getpropnum(##objHttp, "Status") == 200);
 
 make_menu:
 
