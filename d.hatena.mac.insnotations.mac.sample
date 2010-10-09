@@ -112,7 +112,7 @@ gen_func:
 	// このマクロ末尾にデータを挿入して保存して閉じる。
 	title $mn + currentmacrofilename + "にデータを挿入中。";
 	call ins_str ##html;
-	call mod_macro;
+	call mod_macro ##l;
 	title $mn + currentmacrofilename + "を上書き保存して閉じています。";
 	save;
 
@@ -189,17 +189,18 @@ return;
 
 mod_macro:
 // そのままマクロとして使うには不適切な文字や文章構造を是正する。
+//arg: #関数先頭の論理行番号
 
-	beginsel;
-	gosearchstarted;
 	// 文字定数内の " 記号対策
-	forceinselect 1;
-	replaceallfast "(?<! )\"(?!;)", "\\\"", regular, inselect;
+	beginsel;
+	moveto2 0, ##1;
+	replaceallfast "(?<! )\"(?!;)", "\\\\\"", regular, inselect;
 	// 文字定数内の改行(TDタグ内の<br>)対策
-	forceinselect 1;
-	replaceallfast "\\n(?![r\\t\\n])", ", ", regular, inselect;
+	gosearchstarted;
+	beginsel;
+	gofileend;
+	replaceallfast "(?\\1)(\\n)[^r\\t\\n]", ", ", regular, inselect;
 	// "～"っぽい文字(Unicodeの0x301C)対策
-	forceinselect 1;
 	replaceallfast "[\\u301C]+", "～～", regular, inselect;
 	endsel;
 
