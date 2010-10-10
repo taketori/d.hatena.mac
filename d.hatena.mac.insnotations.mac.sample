@@ -21,7 +21,7 @@ MAIN:
 	if($nota[##res] == ""){
 		// メニューの再構築。
 		//NOTE: $nota[##res] == ""となるのは現状では再構築コマンドだけ。
-		title $mn + currentmacrofilename + "を開いています。";
+		title $mn + currentmacrofilename + "を開いてメニューの再構築をしています。しばらくお待ちください。";
 		##hdlStart = hidemaruhandle(0);
 		openfile "/z /n /h /je /m5 " + currentmacrofilename;		// ステルス秀丸でカーソルは文章末。
 		saveas $$main + ".insnotations.mac", sjis, cr, lf, noaddhist;
