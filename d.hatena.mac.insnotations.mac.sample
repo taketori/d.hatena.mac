@@ -16,6 +16,7 @@ MAIN:
 	call make_menu;
 	//*****
 	menuarray $menu, ##return;
+	if(!result)	endmacro;
 	##res = result - 1;
 	if($nota[##res] == ""){
 		// メニューの再構築。
