@@ -210,9 +210,9 @@ return;
 make_menu:
 
 	##mi = 0;
-	//begin menu
+	//begin inserted items
 
-	//end menu
+	//end inserted items
 	$menu[##mi] = "\x01";
 	##mi = ##mi + 1;
 	$menu[##mi] = "(&R)	データ取得してメニュー再構築";
