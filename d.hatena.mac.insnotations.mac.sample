@@ -66,8 +66,11 @@ disp_notamenu:
 	}
 	menuarray $$nmenu, ##i;
 	if(!result)	endmacro;
+	$$ret = $$nmenu[result - 1];
 
-return $$nmenu[result - 1];
+	freedll ##dll;
+
+return $$ret;
 
 ins_kihou:
 //arg: $‘®
