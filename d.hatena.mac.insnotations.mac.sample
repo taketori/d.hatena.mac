@@ -34,6 +34,7 @@ MAIN:
 
 	// サブメニューを表示する。
 	menuarray $menu[##res], val($nota[##res]);
+	if(!result)	endmacro;
 	$$kihou = $nota[##res][result - 1];
 
 	// 1つの記法で複数の書式がある場合、メニューでそれらを択一する。
@@ -64,6 +65,7 @@ disp_notamenu:
 		##i = ##i + 1;
 	}
 	menuarray $$nmenu, ##i;
+	if(!result)	endmacro;
 
 return $$nmenu[result - 1];
 
