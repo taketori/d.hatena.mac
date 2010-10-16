@@ -207,6 +207,40 @@ mod_macro:
 
 return;
 
+replace_zenkaku:
+// 書式中の全角記号を選択範囲で置換する。
+//arg: 書式
+//ret: 置換後の書式
+
+	call load_dll;
+	##dll = ##return;
+
+	// すべての"。。"を選択範囲全体と置換する。
+	$$ret = dllfuncstr(##dll, "ReplaceRegular", "\\s*。。\\s*", $$1, 0,
+	                   "\\n" + gettext(seltopx, seltopy, selendx, selendy, 1) + "\\n", 1);
+
+	// "～～"を選択範囲1行ずつと置換する(書式内に"～～"が複数あっても最初の1つだけ)。
+	##pos = dllfunc(##dll, "FindRegular", "\\s*～～\\s*", $$1, 0);
+	if(0 <= ##pos){
+		$$bfr = leftstr($$1, ##pos);
+		$$aft = midstr($$1, ##pos +  dllfunc(##dll, "GetLastMatchLength"), );
+		$$sel = gettext(seltopx, seltopy, selendx, selendy, 1);
+		$$reg = "([^\\r\\n]+)([\\r\\n]*)";
+		##pos = dllfunc(##dll, "FindRegular", $$reg, $$sel, 0);
+		while(0 <= ##pos){
+			##len1 = dllfunc(##dll, "GetLastMatchTagLength", 1);
+			##len2 = dllfunc(##dll, "GetLastMatchTagLength", 2);
+			$$ret  = $$ret
+			       + $$bfr + midstr($$sel, ##pos, ##len1) + $$aft
+			       + midstr($$sel, ##pos + ##len1, ##len2)/*改行*/;
+			##pos  = dllfunc(##dll, "FindRegular", $$reg, $$sel, ##pos + ##len1);
+		}
+	}
+
+	freedll ##dll;
+
+return $$ret;
+
 make_menu:
 
 	##mi = 0;
