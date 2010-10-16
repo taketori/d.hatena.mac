@@ -42,7 +42,7 @@ MAIN:
 		call disp_notamenu $$kihou;
 		$$kihou = $$return;
 	}
-	insert $$kihou;
+	call ins_kihou $$kihou;
 
 endmacro;
 
@@ -66,6 +66,37 @@ disp_notamenu:
 	menuarray $$nmenu, ##i;
 
 return $$nmenu[result - 1];
+
+ins_kihou:
+//arg: $書式
+
+	$$kihou = $$1;
+
+	// 書式内の全角文字列を選択範囲で置換する。
+	##size = 3000;		// 文字列変数の扱えるサイズ。安全を見込んで4kより少なめ。
+	if((selecting | rectselecting | lineselecting)
+	&& charcount(0x1 | 0x100 | 0x100000 | 0x80000000) < ##size){
+		call replace_zenkaku $$kihou;
+		$$kihou = $$return;
+	}
+
+	// 実際に挿入する。
+	begingroupundo;
+	##x = x;	##y = y;
+	insertfix $$kihou;
+	searchdown2 "[^\\x01-\\x7e]+", regular, nohilight;		// ascii以外。文字コードによらずいけるっぽいが検証は完全ではない。
+	if(result == false
+	|| strlen($$kihou) < strlen(gettext(##x, ##y, foundendx, foundendy, 1))){
+		// 入力部分末尾にカーソルを移動する。
+		gosearchstarted;
+		right strlen($$kihou);
+	}else if(gettext(foundtopx, foundtopy, foundendx, foundendy, 1) == "～～"){
+		// 最初の波線を削除する。
+		delete;
+	}
+	endgroupundo;
+
+return;
 
 load_dll:
 //ret: DLLの識別値。失敗したら終了。
