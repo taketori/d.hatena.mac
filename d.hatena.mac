@@ -9,7 +9,7 @@ $mn = "はてなダイアリー用マクロ - ";
 $id = "";
 
 // 実行できない条件の時は、さっさと終了する。
-if( version < 801 ){
+if( version < 802 ){
 	message "秀丸のバージョンが古いです。" + currentmacrobasename + "を終了します。";
 	endmacro;
 }
