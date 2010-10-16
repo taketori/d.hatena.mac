@@ -54,8 +54,10 @@ EXIT:
 
 	if($$1 != "")	message $mn + "\n" + $$1;
 
-	escape;
-	moveto #_[0], #_[1];
+	if(!##return){
+		escape;
+		moveto #_[0], #_[1];
+	}
 	setsearch $_[0], #_[2];
 	setsearchhist 0, $_[1];
 	if( #_[5] )	overwriteswitch;
@@ -171,7 +173,7 @@ mod_entry:
 			$$uri = $$return;
 		}
 		question $mn + "修正していいですか。";
-		if(!result)	return;
+		if(!result)	return 0;
 	}else{
 		call runex_to currentmacrofilename + ".exe msgbox \"" + $mn + "\" "
 		              + "\"URIの記事を現在編集中の内容で上書き後、日記として公開しますか。\n"
@@ -205,7 +207,7 @@ del_entry:
 	}
 	title $mn;
 	question $mn + "本当に削除しますか。\n" + $$uri;
-	if(!result)	return;
+	if(!result)	return 0;
 	call connect_hatena "DELETE", $$uri, 0, $$1;		//失敗の時はマクロ終了。
 	message $mn + "\n削除しました。";
 
@@ -441,6 +443,5 @@ ins_notations:
 	execmacro $$sub_mac, $mn, currentmacrofilename;
 	setreplace $$r;
 	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
-	#_[0] = x;	#_[1] = y;
 
-return 0;
+return 1;
