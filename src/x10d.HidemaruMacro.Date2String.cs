@@ -83,6 +83,8 @@ namespace x10d.HidemaruMacro {
 
 		private DateTime ParseString(string dtstr, CultureInfo ci, DateTimeStyles dts) {
 
+			if(dtstr == "")	return DateTime.Now;		// ‚±‚Ìs‚ª‚È‚¢ê‡A“–“ú00•ª‚ğ•Ô‚·B
+
 			DateTime dt = new DateTime ();
 			try {
 				try {
