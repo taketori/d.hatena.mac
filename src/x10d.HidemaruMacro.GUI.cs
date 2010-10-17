@@ -42,6 +42,7 @@ namespace x10d.HidemaruMacro {
 			public ChooseOneForm(Hashtable userPass) {
 				lbUser = new ChoicesListBox (userPass);
 				lbUser.DoubleClick += new EventHandler(this.lbUser_DoubleClicked);
+				lbUser.Sorted = true;
 				Controls.Add(lbUser);
 
 				// http://msdn.microsoft.com/ja-jp/library/system.windows.forms.form.acceptb(v=VS.80).aspx
