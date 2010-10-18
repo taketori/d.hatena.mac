@@ -424,6 +424,7 @@ set_user:
 		$$pw = input($mn + "\nユーザ名:" + $$user + "　のパスワードを入力してください。\n入力文字はそのまま表示されるので周囲に注意。", "password");
 		if($$pw == "")	return "";
 		call runex_to $$exe +  " user " + $$user + " " + $$pw;
-	}else	setstaticvariable "x10d_" + currentmacrobasename + "_user", $$user, 0;
+	}
+	setstaticvariable "x10d_" + currentmacrobasename + "_user", $$user, 0;
 
 return $$user;
