@@ -62,14 +62,18 @@ class d_hatena_mac {
 		passwordDigest = b64_sha1(nonce + created + Settings.hash[user]);
 
 		// iniファイルに書き込む。
-		if(Settings.hash[user].ToString() == ""){
-			IniIO.WriteIniStr(section, "x-wsse", "", inifile);
-			return 1;
+		if(Settings.hash.ContainsKey(user)){
+			if(Settings.hash[user].ToString() == ""){
+				IniIO.WriteIniStr(section, "x-wsse", "", inifile);
+				return 1;
+			}else{
+				IniIO.WriteIniStr(section, "x-wsse",
+				  String.Format("UsernameToken Username=\"{0}\", PasswordDigest=\"{1}\", Created=\"{2}\", Nonce=\"{3}\"", user, passwordDigest, created, nonceEncoded),
+				  inifile);
+				return 0;
+			}
 		}else{
-			IniIO.WriteIniStr(section, "x-wsse",
-			  String.Format("UsernameToken Username=\"{0}\", PasswordDigest=\"{1}\", Created=\"{2}\", Nonce=\"{3}\"", user, passwordDigest, created, nonceEncoded),
-			  inifile);
-			return 0;
+			return 1;
 		}
 	}
 

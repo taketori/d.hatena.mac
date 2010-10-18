@@ -99,6 +99,7 @@ namespace x10d.HidemaruMacro {
 				foreach(string key in userPass.Keys){
 					Items.Add(key);
 				}
+				Items.Add("*IDを手入力する*");
 				EndUpdate();
 				SelectedIndex = 0;
 				Height = (Items.Count + 1) * ItemHeight;
@@ -106,5 +107,4 @@ namespace x10d.HidemaruMacro {
 		}
 	}
 }
-//TODO: ユーザー名が空白、または1つも登録されていないときに、ユーザ名を入力させる。
 //TODO: ツールチップを表示する。http://uchukamen.com/Programming1/ToolTip/index.htm
