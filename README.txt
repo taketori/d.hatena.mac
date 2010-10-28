@@ -69,24 +69,26 @@
 
 3. 配布ファイルに同梱されているもの
 
- README.txt                            「README」。このファイルです。
- d.hatena.mac.txt                      「マニュアル」。使い方や設定方法を記載しています。
- d.hatena.mac.history.txt              「改版履歴」
- d.hatena.mac                          「メインマクロ」
- d.hatena.mac.makedata.mac             「データ生成マクロ」。
-                                         編集中の文章を投稿データとして生成します。
- d.hatena.mac.xml                      「データひな形XML」
-                                         上記マクロで使われるデータのひな形。
- d.hatena.mac.insnotations.mac.sample  「はてな記法入力マクロ」のサンプル。
- d.hatena.mac.ini.sample               「.INI(動作設定を記載したファイル)」のサンプル。
- d.hatena.mac.YourID.tags.list.sample  「カテゴリ補完用辞書ファイル」のサンプル。
- d.hatena.mac.Settings.cs.sample       「IDパスワード設定ファイル」のサンプル。
- src/d.hatena.mac.cs                   「本マクロ用実行ファイル ソース」
-                                         メインマクロ実行時にcsc.exeを使ってコンパイルされ、
-                                         生成された実行ファイルを用いて暗号化とかします。
- src/x10d.HidemaruMacro.Date2String.cs 「本マクロ用実行ファイル ライブラリDate2String」
- src/x10d.HidemaruMacro.GUI.cs         「本マクロ用実行ファイル ライブラリGUI」
- src/x10d.HidemaruMacro.IniIO.cs       「本マクロ用実行ファイル ライブラリIniIO」
+(フォルダ構造)
+│ README.txt                            「README」。このファイルです。
+│ d.hatena.mac.txt                      「マニュアル」。使い方や設定方法を記載しています。
+│ d.hatena.mac.history.txt              「改版履歴」
+│ d.hatena.mac                          「メインマクロ」
+│ d.hatena.mac.makedata.mac             「データ生成マクロ」。
+│                                         編集中の文章を投稿データとして生成します。
+│ d.hatena.mac.xml                      「データひな形XML」
+│                                         上記マクロで使われるデータのひな形。
+│ d.hatena.mac.insnotations.mac.sample  「はてな記法入力マクロ」のサンプル。
+│ d.hatena.mac.ini.sample               「.INI(動作設定を記載したファイル)」のサンプル。
+│ d.hatena.mac.YourID.tags.list.sample  「カテゴリ補完用辞書ファイル」のサンプル。
+│ d.hatena.mac.Settings.cs.sample       「IDパスワード設定ファイル」のサンプル。
+└src
+     d.hatena.mac.cs                     「本マクロ用実行ファイル ソース」
+                                           メインマクロ実行時にcsc.exeを使ってコンパイルされ、
+                                           生成された実行ファイルを用いて暗号化とかします。
+     x10d.HidemaruMacro.Date2String.cs   「本マクロ用実行ファイル ライブラリDate2String」
+     x10d.HidemaruMacro.GUI.cs           「本マクロ用実行ファイル ライブラリGUI」
+     x10d.HidemaruMacro.IniIO.cs         「本マクロ用実行ファイル ライブラリIniIO」
 
  　4つのサンプルファイルは、マクロ起動前にファイル名から「.sample」を削除(改名)しておきます。後述する<5. インストールとバージョンアップ、アンインストール>をご覧ください。
 
@@ -102,15 +104,14 @@
 5. インストールとバージョンアップ、アンインストール
 
  1. インストールは他の秀丸エディッタ用のマクロと同様です。
-  　配布ファイルに含まれる全てのファイルを、同じフォルダに展開してください。
-  　d.hatena.macをマクロ登録しておくといいです。
+  　配布ファイルに同梱の全てのファイルを、同じフォルダに(フォルダ構造を保ったまま)展開してください。
+
  2. 配布ファイルに同梱の4つのサンプルファイル(ファイル名末尾が".sample"となっているファイル)は、改名してファイル名末尾の".sample"を削除してください。
   　たとえば「d.hatena.mac.ini.sample」は「d.hatena.mac.ini」という風にします。
- 3. さらに「d.hatena.mac.YourID.tags.list」の"YourID"の部分をご自身のはてダのIDに変更します。
- 4. 「d.hatena.mac.ini」にてマクロの動作設定を、「d.hatena.mac.YourID.tags.list」にてカテゴリ(タグ)のリストを、「d.hatena.mac.Settings.cs」にてIDとパスワードの設定を記載します。
-  　詳細は<d.hatena.mac.txt>をご覧ください。
 
- ・使い方、設定方法は、同梱のマニュアル<d.hatena.mac.txt>をご覧ください。
+  　その他、必須ではありませんがおすすめする準備があります。詳細は同梱のマニュアル<d.hatena.mac.txt>をご覧ください。
+
+ ・使い方、設定方法は、同梱のマニュアルをご覧ください。
 
  ・バージョンアップ時の注意
  　メインマクロにIDなどを記載した場合は、マクロをインストールするたびに設定し直す必要があります。
