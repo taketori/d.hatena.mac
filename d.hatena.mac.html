@@ -28,7 +28,7 @@
     p { margin-left: 3%; color: #340424; }
     code { margin-left: 2px; margin-right: 2px;  padding-left: 5px; padding-right: 5px;
              background: #000; color: #fff;  border-radius: 3px;}
-    kbd {  border-bottom-style: groove; }
+    kbd {   margin-left: 2px; margin-right: 2px;  padding-left: .7ex; padding-right: .7ex; border: inset .2em; background-color: white; }
     .file {  border-bottom: 1px dotted blue;  font-family: monospace;  }
     .key { margin: 0 3px;  padding: 0 5px;  border-width: 1px 2px 3px 1px;  border-style: solid;  
             border-color: #999;  font-family: monospace;  border-radius: 4px;}
@@ -41,6 +41,8 @@
 <p>　これは、はてなダイアリー用マクロ(以下「本マクロ」。メインマクロは<span class="file">d.hatena.mac</span>。)の「マニュアル」<span class="file">d.hatena.mac.html</span>です。</p>
 
 <p>　マクロの概要は、配布ファイルに同梱の<span class="file">README.txt</span>をごらんください。</p>
+
+<p>　凡例：<span class="file">ファイルやフォルダ</span>、<code>出力やファイルの内容</code>、<kbd>入力内容</kbd>、<span class="key">押下するキー</span>。</p>
 
 <h2><a name="Prep">準備</a></h2>
 
@@ -106,7 +108,7 @@
 <p>　通常、はてダに接続するたびにIDとパスワードを問い合わせます。それが面倒くさい場合は準備をした方がちょっと幸せになります。IDは以下の規則により決定されます。</p>
 
 <ol>
-<li><p>データ(秀丸で編集中の文章)中に <code>blog:ID</code> のような行があれば、そこで指定されたもの。</p>
+<li><p>データ(秀丸で編集中の文章)中に<code>blog:ID</code>のような行があれば、そこで指定されたもの。</p>
 
 <p>　要するに都度IDを指定する使い方になります。いつもとは違うIDなんかを使う場合や準備が面倒くさい場合にはこの方法をおすすめします。</p>
 
@@ -129,7 +131,7 @@
 <pre><code>    $id = "";
 </code></pre>
 
-<p>とあると思うので、(id:foobarの場合)<code>"foobar"</code>というようにIDを追記して保存する。</p></li>
+<p>とあると思うので、(id:foobarの場合)<kbd>$id = "foobar";</kbd>というようにIDを追記して保存する。</p></li>
 <li><p>ダイアログで指定されたID</p>
 
 <p>　上記の条件をすべて満たさない場合はダイアログを表示しますので、そこから択一してください。はてダIDを複数使い分ける場合におすすめです。パスワードの指定もできます。</p>
@@ -180,10 +182,10 @@
 <li><span class="file">d.hatena.mac.util.dll</span> : <span class="file">d.hatena.mac.Settings.cs</span>からコンパイルされます。</li></ul></li>
 <li>コンパイルにはcsc.exe(C#)を用います。コンパイル中はアウトプット枠に経過を表示します。</li>
 <li>コンパイルに失敗したらアウトプット枠やダイアログにエラーを表示します。以下の項目を確認してください。
-<ul><li>csc.exeが存在している(.NET Framework Ver.1.14322以上がインストールされている)か、実行可能な権限かなど。</li>
+<ul><li>csc.exeが存在している(.NET Framework Ver.1.1.4322以上がインストールされている)か、実行可能な権限かなど。</li>
 <li>メインマクロ(<span class="file">d.hatena.mac</span>)と同じフォルダに<span class="file">d.hatena.mac.Settings.cs</span>や<span class="file">\src</span>フォルダが存在するか。</li>
 <li><span class="file">d.hatena.mac.Settings.cs</span>でIDやパスワードが適切に設定されているか、設定する際にC#の文法エラーになるような設定をしていないか。</li></ul></li></ul></li>
-<li><p><em>続いてメニューを表示します。</em>以下の7項目よりいずれかを選択してください。</p>
+<li><p><em>続いてメニューを表示します。</em>以下の7項目よりいずれかを選択してください(アクセスキーの押下、たとえば「取得」であれば<span class="key">G</span>でもいけます)。</p>
 
 <ul><li><a href="#Post">投稿</a></li>
 <li><a href="#Get">取得</a></li>
@@ -215,19 +217,17 @@
 
 <h4>既存の記事を修正</h4>
 
-<p>　「<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/blog/atom/～</code>」または「<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/draft/atom/～</code>」という行がデータ(範囲選択していたらその範囲)の先頭にあればその指定の記事を対象に、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を対象に上書きします。</p>
+<p>　<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/blog/atom/～</code>または<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/draft/atom/～</code>という行がデータ(範囲選択していたらその範囲)の先頭にあればその指定の記事を、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を上書きします。</p>
 
 <h4>下書きを公開</h4>
 
-<p>　事前に当該の記事を<a href="#Get">取得</a> した上<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/draft/atom/～</code> という行の行頭の「<kbd>draft</kbd>」を「<kbd>blog</kbd>」に変更した上で「修正」を選んでください。</p>
+<p>　事前に当該の記事を<a href="#Get">取得</a> した上、<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/draft/atom/～</code>という行の行頭の<kbd>draft</kbd>を<kbd>blog</kbd>に変更した上で「修正」を選んでください。</p>
 
 <h3><a name="Del">削除</a></h3>
 
 <p>　はてダの記事を削除します。</p>
 
-<p>　ほかと同様、<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/～</code> という行があればその記事を対象に、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を対象に削除します。</p>
-
-<p>　記事を削除したら復活できませんので、くれぐれも慎重な操作を。</p>
+<p>　ほかと同様、<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/～</code>という行があればその記事を、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を削除します。</p>
 
 <h3><a name="Nota">はてな記法を挿入</a></h3>
 
@@ -259,7 +259,7 @@
 
 <p>　はてな記法入力マクロ(<span class="file">d.hatena.mac.insnotations.mac</span>。特にmake_menu関数)を編集するといくらでも便利になります。  </p>
 
-<p>　特に、通常文章が挿入される記法((スーパー)pre記法や脚注記法など)中の 「<kbd>～～</kbd>」 を 「<kbd>。。</kbd>」 にしておくと、"記法中の「。。」部分を選択範囲全体で置換" という機能を利用できてちょっと編集が楽になると思います。</p>
+<p>　特に、通常文章が挿入される記法((スーパー)pre記法や脚注記法など)中の<kbd>～～</kbd>を<kbd>。。</kbd>にしておくと、"記法中の「。。」部分を選択範囲全体で置換" という機能を利用できてちょっと編集が楽になると思います。</p>
 
 <p>　なお、<strong>「データ取得してメニュー再構築」を選択すると、この部分(make_menu関数全体)が再編集されます</strong>のでお気をつけください。</p>
 
@@ -286,26 +286,24 @@
 
 <h5>辞書ファイルの書式</h5>
 
-<ul>
-<li>各カテゴリは1行ごとに記載します。</li>
-<li>カテゴリタグは <strong>[ ]</strong> でくくります。</li>
-<li>1行に複数のカテゴリを記載できます。
-<ul><li>たとえば <em>[d.hatena.mac]</em> カテゴリが必ず <em>[秀丸]</em>、<em>[マクロ]</em>、<em>[自作]</em> カテゴリとともに用いられている場合は、1行中に<code>[秀丸][マクロ][自作][d.hatena.mac]</code>としておくといいです。</li></ul></li>
-<li>タグの途中にある文字列も補完の対象となります。
-<ul><li>下記の例では、たとえば<kbd>[マクロ</kbd>と入力するとこの文字列が含まれている <em>[秀丸][マクロ]</em> や <em>[秀丸][マクロ][自作][d.hatena.mac]</em> が補完の対象になります。</li>
-<li>完璧ではありませんのでよく使うカテゴリを行の先頭にしておくといいです。</li></ul></li>
-<li>半角スペースの連続から行末までは補完時のみ表示されますので、註釈とか覚え書きとかそういうのを書いておくといいです。
-<ul><li>下記の例の <code>[秀丸]   秀丸全般の話題</code> は 「   秀丸全般の～」 という部分がそれに該当します。</li></ul></li>
-</ul>
+<p>　以下の例を元に説明します。</p>
 
-<h5>例</h5>
-
-<pre><code>    [秀丸]          秀丸全般の話題
-    [秀丸][マクロ]  秀丸の話題のうちマクロの技術的なネタなど
+<pre><code>    [秀丸]
+    [秀丸][マクロ]
     [自作]          ソフトもハードも工作もプログラミングも
     [秀丸][マクロ][自作][d.hatena.mac]   はてなダイアリー用マクロの話題
-    [秀丸][マクロ][自作][twidemaru]   twidemaruの話題
 </code></pre>
+
+<ul>
+<li>各カテゴリは1行ごとに記載し、各カテゴリタグは <strong>[ ]</strong> でくくります。</li>
+<li>1行に複数のカテゴリを記載できます(2、4行目)。
+<ul><li>たとえば <em>[マクロ]</em> カテゴリは必ず <em>[秀丸]</em> カテゴリとともに用いるので、<code>[秀丸][マクロ]</code>と1行で記載しています。</li></ul></li>
+<li>半角スペースの連続から行末までは補完時のみ表示されますので、註釈とか覚え書きとかそういうのを書いておくといいです(3、4行目)。
+<ul><li>3行目の<code>[自作]          ソフトもハードも工作もプログラミングも</code>では「          ソフトもハードも工作もプログラミングも」という部分が該当します。</li></ul></li>
+<li>入力する際は、タグの途中にある文字列も補完の対象となります。
+<ul><li>たとえば<kbd>[マクロ</kbd>と入力するとこの文字列が含まれている <em>[秀丸][マクロ]</em>(2行目)や <em>[秀丸][マクロ][自作][d.hatena.mac]</em>(4行目)が補完の対象になります。</li>
+<li>完璧ではありませんのでよく使うカテゴリを行の先頭にしておくといいです。</li></ul></li>
+</ul>
 
 <h4>うまくいかなかった場合</h4>
 
