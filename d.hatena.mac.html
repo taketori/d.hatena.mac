@@ -120,7 +120,7 @@
 <p><strong>準備すること:特になし。</strong></p></li>
 <li><p>メインマクロで指定されたID</p>
 
-<p>　メインマクロにIDを指定(いわゆるハードコーディング)します。上記の条件を満たさない場合にこのIDを利用します。はてダIDを一つしか使わない場合におすすめです。逆に複数のIDを使い分けている場合にはこの設定はしないでください。</p>
+<p>　メインマクロにIDを指定(いわゆるハードコーディング)してあって、上記の条件を満たさない場合にこのIDを利用します。はてダIDを一つしか使わない場合におすすめです。逆に複数のIDを使い分けている場合にはこの設定はしないでください。</p>
 
 <p><strong>準備すること:以下の要領で。</strong></p>
 
@@ -178,9 +178,9 @@
 <ul><li>マクロが確認するのは2つのファイルです。
 <ul><li><span class="file">d.hatena.mac.exe</span> : <span class="file">\src</span>フォルダ配下の4ファイルからコンパイルされます。</li>
 <li><span class="file">d.hatena.mac.util.dll</span> : <span class="file">d.hatena.mac.Settings.cs</span>からコンパイルされます。</li></ul></li>
-<li>コンパイルはcsc.exe(C#)を用います。</li>
-<li>コンパイルに失敗した場合のみ、アウトプット枠もしくはダイアログにエラーを表示します。以下の項目を確認してください。
-<ul><li>csc.exeが存在している(.NET Frameworkがインストールされている)か、実行可能な権限かなど。</li>
+<li>コンパイルにはcsc.exe(C#)を用います。コンパイル中はアウトプット枠に経過を表示します。</li>
+<li>コンパイルに失敗したらアウトプット枠やダイアログにエラーを表示します。以下の項目を確認してください。
+<ul><li>csc.exeが存在している(.NET Framework Ver.1.14322以上がインストールされている)か、実行可能な権限かなど。</li>
 <li>メインマクロ(<span class="file">d.hatena.mac</span>)と同じフォルダに<span class="file">d.hatena.mac.Settings.cs</span>や<span class="file">\src</span>フォルダが存在するか。</li>
 <li><span class="file">d.hatena.mac.Settings.cs</span>でIDやパスワードが適切に設定されているか、設定する際にC#の文法エラーになるような設定をしていないか。</li></ul></li></ul></li>
 <li><p><em>続いてメニューを表示します。</em>以下の7項目よりいずれかを選択してください。</p>
