@@ -287,13 +287,13 @@ compile_src:
 	  // %r=.NET Frameworkのインストールフォルダ を取得して代入する。
 	  + "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
 	  // フォルダ名で降順に列挙し、%c=csc.exeへのフルパス として代入する。
-	  + "DO @( FOR /F \"delims= \" %c IN ('dir /O:-N /S /B %r\\csc.exe') "
+	  + "DO @(FOR /F \"delims=\" %c IN ('\"dir/S/B %r\\csc.exe|sort/R\"') "
 	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
-	       + "DO @( echo -- %c --"
-	          +  "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
-	          + "&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	       + "DO @(echo -- %c --"
+	          + "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
+	          +"&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
 	  // コンパイルできたら、その場で直ちに終了する。何かエラーがあれば、(ほかにもインストールされているバージョンがあれば)ループを回す。
-	          + "&& exit 0) )",
+	          +" && exit 0))",
 	  7, "";
 
 return ##return;
