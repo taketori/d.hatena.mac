@@ -32,11 +32,11 @@ INIT:
 	if(!existfile($$ini)){
 		call EXIT "\t" + $$ini + " (設定ファイル)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.ini.sampleをコピーし上記に改名してください";
 	}
-	$$dll_src = currentmacrofilename + ".Settings.cs";
-	$$dll     = currentmacrofilename + ".util.dll";
-	$$exe     = currentmacrofilename + ".exe";
+	$$dll_src = currentmacrobasename + ".Settings.cs";
+	$$dll     = currentmacrobasename + ".util.dll";
+	$$exe     = currentmacrobasename + ".exe";
 	call compile_src $$dll_src, $$dll, $$exe;
-	if(##return)	call EXIT "  " + $$dll + "\n  " + $$exe + "\nのいずれかor両方のコンパイルを中止しました。\n　理由はアウトプット枠をご覧ください。たぶん\n・ " + $$dll_src + " にエラーがある。\n・.Net Frameworkがインストールされていないか古い。\nのいずれかです。";
+	if(##return)	call EXIT "  " + $$dll + "\n  " + $$exe + "\nのいずれかor両方のコンパイルを中止しました。\n　理由はたぶん\n・ " + $$dll_src + " にエラーがある。\n・.Net Frameworkがインストールされていないか古い。\n・コマンドラインが長い(マクロが存在するディレクトリのフルパス名が長い)\nのいずれかです。アウトプット枠も参照してください。";
 
 MAIN:
 
@@ -255,16 +255,16 @@ get_list:
 return $$return;
 
 compile_src:
-//arg: $1:DLLのソース, $2:DLLのフルパス, $3:実行ファイルのフルパス
+//arg: $1:DLLソースのファイル名, $2:DLLのファイル名, $3:実行ファイル名($1～$3はパスを含まない)
 //ARG: $mn,  Registory
 //ret: #コンパイルの結果(0=成功, 0以外=失敗)
 
 	title $mn + "コンパイルする準備をしています。";
-	if(existfile($$2)){
+	if(existfile(currentmacrodirectory + "\\" + $$2)){
 		##objFSO = createobject("Scripting.FileSystemObject");
-		$$src = getpropstr(member(##objFSO, "GetFile", $$1), "DateLastModified");
-		$$dll = getpropstr(member(##objFSO, "GetFile", $$2), "DateLastModified");
-		if(existfile($$3)
+		$$src = getpropstr(member(##objFSO, "GetFile", currentmacrodirectory + "\\" + $$1), "DateLastModified");
+		$$dll = getpropstr(member(##objFSO, "GetFile", currentmacrodirectory + "\\" + $$2), "DateLastModified");
+		if(existfile(currentmacrodirectory + "\\" + $$3)
 		&& strlen($$dll)
 		&&  val(midstr($$src, 0, 2) + midstr($$src, 3, 2) + midstr($$src, 6, 2)
 		       + midstr($$src, 13, 2) + midstr($$src, 16, 2))
@@ -274,8 +274,8 @@ compile_src:
 			return 0;
 		}
 	}else{
-		if(!existfile($$1)){
-			call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nがないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
+		if(!existfile(currentmacrodirectory + "\\" + $$1)){
+			call EXIT "\t" + $$1 + " (本マクロ用実行ファイルの DLLソース)\nが " + currentmacrodirectory + " にないので継続できません。\n配布ファイルに同梱の d.hatena.mac.Settings.cs.sample をコピーし上記に改名してください。\n\n　このファイルにユーザID(とさらに任意でパスワード)を記載しておくと、複数のはてなダイアリーを使い分けることができます。\n　詳細は上記のファイルをご覧ください。";
 		}
 	}
 
@@ -290,8 +290,9 @@ compile_src:
 	  + "DO @(FOR /F \"delims=\" %c IN ('\"dir/S/B %r\\csc.exe|sort/R\"') "
 	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
 	       + "DO @(echo -- %c --"
+	          + "& cd " + currentmacrodirectory
 	          + "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1 + " "
-	          +"&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " " + currentmacrodirectory + "\\src\\*.cs"
+	          +"&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " .\\src\\*.cs"
 	  // コンパイルできたら、その場で直ちに終了する。何かエラーがあれば、(ほかにもインストールされているバージョンがあれば)ループを回す。
 	          +" && exit 0))",
 	  7, "";
@@ -303,6 +304,7 @@ runex_to:
 //arg: $1:実行するプログラムのフルパス, #2:出力する場所, $3:#2がファイルの時のファイル名
 //ret: 0=正常に起動でき終了コード0だった。0以外=プログラムの起動に失敗か終了コードが0以外。
 
+	if(520/*Ver8.02現在での最長*/ <= strlen($$1))	return 1;
 	runex $$1, 1/*sync:sync*/, 0, ""/*stdin:none*/, ##2, $$3/*stdout*/, 0, ""/*stderr:none*/, 1, ""/*folder:current*/, 2/*show:hide*/, 0/*nodraw:draw*/, 0/*code:ansi*/;
 
 return (result == false) + getresultex(9);
