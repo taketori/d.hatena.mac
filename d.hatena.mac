@@ -290,7 +290,7 @@ compile_src:
 	  + "DO @(FOR /F \"delims=\" %c IN ('\"dir/S/B %r\\csc.exe|sort/R\"') "
 	  // %cを利用してコンパイル。失敗したら順次古いバージョンでコンパイル。
 	       + "DO @(echo -- %c --"
-	          + "& cd " + currentmacrodirectory
+	          + "& cd/D " + currentmacrodirectory
 	          + "& %c /warnaserror+ /w:4 /t:library /out:" + $$2 + " " + $$1
 	          +"&& %c /warnaserror+ /w:4 /t:winexe /R:" + $$2 + " /out:" + $$3 + " .\\src\\*.cs"
 	  // コンパイルできたら、その場で直ちに終了する。何かエラーがあれば、(ほかにもインストールされているバージョンがあれば)ループを回す。
