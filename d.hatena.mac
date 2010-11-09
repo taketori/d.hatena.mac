@@ -445,5 +445,6 @@ ins_notations:
 
 	$$ret = getresultex(-1);
 	if(3 <= strlen($$ret))	call EXIT $$ret;			// 3文字以上ならたぶんエラーメッセージ。
+	else if("1" == $$ret)		call ins_notations;		// 1=マクロを自己生成した。
 
 return 1;
