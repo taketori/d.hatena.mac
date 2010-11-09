@@ -442,6 +442,8 @@ ins_notations:
 	$$r = replacebuffer;
 	execmacro $$sub_mac, $mn, currentmacrofilename;
 	setreplace $$r;
-	if(3 <= strlen(getresultex(-1)))	call EXIT getresultex(-1);		// 3文字以上ならたぶんエラーメッセージ。
+
+	$$ret = getresultex(-1);
+	if(3 <= strlen($$ret))	call EXIT $$ret;			// 3文字以上ならたぶんエラーメッセージ。
 
 return 1;

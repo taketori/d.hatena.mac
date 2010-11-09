@@ -5,9 +5,9 @@
 
 INIT:
 
-	if(argcount != 2)	endmacro "引数が不正です。";
-	$mn = getarg(0);			// マクロの名前
-	$$main = getarg(1);		// メインマクロのフルパス
+	if(argcount < 2)	endmacro "引数が不正です。";
+	$mn    = getarg(0);				// マクロの名前
+	$$main = getarg(1);				// メインマクロのフルパス
 
 MAIN:
 
