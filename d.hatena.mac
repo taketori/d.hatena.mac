@@ -283,10 +283,12 @@ compile_src:
 	//NOTE: 持ち出しキットを利用しているときは、秀丸のopenregの結果がfalseになるので使えない。またVer2以上の.NET Frameworkでないと面倒くさいことになるのでスクリプトでもできない。
 	//NOTE: これ以上長いコマンドラインでは、外部プログラムが実行されない。
 	title $mn + $$2 + "を実行ファイルへコンパイルしています。";
+	##hdl = hidemaruhandle(0);
 	##dll = loaddll("HmOutputPane.dll");
 	if(!##dll)	call EXIT "HmOutputPane.dll(アウトプット枠を操作するDLL)のロードに失敗しました。";
-	##hOP = dllfunc(##dll, "GetWindowHandle", hidemaruhandle(0));		// 0=アウトプット枠が閉じている。
-	if(!dllfunc(##dll, "Push",hidemaruhandle(0)))	call EXIT "アウトプット枠の内容の待避に失敗しました。";
+	##hOP = dllfunc(##dll, "GetWindowHandle", ##hdl);		// 0=アウトプット枠が閉じている。
+	if(!dllfunc(##dll, "Push", ##hdl))	call EXIT "アウトプット枠の内容の待避に失敗しました。";
+
 	call runex_to getenv("ComSpec") + " /C "
 	  // %r=.NET Frameworkのインストールフォルダ を取得して代入する。
 	  + "FOR /F \"skip=4 tokens=3\" %r IN ('reg.exe QUERY HKLM\\SOFTWARE\\Microsoft\\.NETFramework /v InstallRoot') "
@@ -302,9 +304,9 @@ compile_src:
 	  7, "";
 
 	if(!##return){
-		if(!dllfunc(##dll, "Pop",hidemaruhandle(0)))	call EXIT "アウトプット枠の内容の復元に失敗しました。";
+		if(!dllfunc(##dll, "Pop", ##hdl))	call EXIT "アウトプット枠の内容の復元に失敗しました。";
 		if(!##hOP){
-			if(sendmessage(dllfunc(##dll, "GetWindowHandle", hidemaruhandle(0)),
+			if(sendmessage(dllfunc(##dll, "GetWindowHandle", ##hdl),
 			               0x111/*WM_COMMAND*/, 1001/*枠を閉じる*/, 0)){
 				//NOTE: 「if(condA && condB)」はcondAがfalseでもcondBを評価してしまう。
 				call EXIT "アウトプット枠を閉じる際にエラーが起きました。";
