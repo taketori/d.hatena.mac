@@ -288,6 +288,16 @@ compile_src:
 	if(!##dll)	call EXIT "HmOutputPane.dll(アウトプット枠を操作するDLL)のロードに失敗しました。";
 	##hOP = dllfunc(##dll, "GetWindowHandle", ##hdl);		// 0=アウトプット枠が閉じている。
 	if(!dllfunc(##dll, "Push", ##hdl))	call EXIT "アウトプット枠の内容の待避に失敗しました。";
+	if(dllfunc(##dll, "Output", ##hdl,
+	           "　　　　　" + $mn + "\r\n\r\n") == false
+	&& dllfunc(##dll, "Output", ##hdl,
+	           "　以下のソースファイルを使って、マクロ用実行ファイルおよびその付属DLLを生成します。\n") == false
+	&& dllfunc(##dll, "Output", ##hdl,
+	           "・" + currentmacrodirectory + "\\" + $$1 + "\r\n・その配下の \\src\\*.cs\r\n\r\n") == false
+	&& dllfunc(##dll, "Output", ##hdl,
+	          "　しばらくお待ちください。\r\n\r\n") == false){
+		call EXIT "アウトプット枠への文字列出力に失敗しました。";
+	}
 
 	call runex_to getenv("ComSpec") + " /C "
 	  // %r=.NET Frameworkのインストールフォルダ を取得して代入する。
@@ -304,6 +314,7 @@ compile_src:
 	  7, "";
 
 	if(!##return){
+		if(!dllfunc(##dll, "Output", ##hdl, "\r\n　コンパイルが正常に終了しました。"))	call EXIT "";
 		if(!dllfunc(##dll, "Pop", ##hdl))	call EXIT "アウトプット枠の内容の復元に失敗しました。";
 		if(!##hOP){
 			if(sendmessage(dllfunc(##dll, "GetWindowHandle", ##hdl),
