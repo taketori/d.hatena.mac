@@ -1,177 +1,177 @@
                                   d.hatena.mac
-                            �͂Ăȃ_�C�A���[�p�}�N��
+                            はてなダイアリー用マクロ
                                 Ver 1.0.0 beta 3
-                          �G�� Ver.8 (8.02�ȏ�) ��p��
+                          秀丸 Ver.8 (8.02以上) 専用版
 
-�@����́Ad.hatena.mac��readme�t�@�C��<README.txt>�ł��B
+　これは、d.hatena.macのreadmeファイル<README.txt>です。
 
-1. �T�v����
-1-1. d.hatena.mac���ĂȂɁH
- �@�G�ۃG�f�B�b�^�p�̃}�N���ł��B
- �@�G�ۂŕҏW���̕��͂��͂Ăȃ_�C�A���[(�ȉ��u�͂ă_�v)�ɓ��e������A�L�����擾������A�L���̕ҏW��폜���ł��܂��B�������ւ����l�̑��삪�s���A������������J�L���ɂ��邱�Ƃ��ł��܂��B
- �@���̃}�N�����g���΁A�Â������e�Ƃ��łȂ���΁A�u���E�U���g���Ă͂ă_�T�C�g��ōs�����������ƊȒP�őf�������e��ҏW���s����Ǝv���܂��B
- �@���A�������Ώۂ͎��g��(ID�ƃp�X���[�h��m���Ă���)�͂ă_�����ł��B�L���̎擾�ɂ�ID�E�p�X���[�h���K�v�ł��B
+1. 概要説明
+1-1. d.hatena.macってなに？
+ 　秀丸エディッタ用のマクロです。
+ 　秀丸で編集中の文章をはてなダイアリー(以下「はてダ」)に投稿したり、記事を取得したり、記事の編集や削除ができます。下書きへも同様の操作が行え、下書きから公開記事にすることもできます。
+ 　このマクロを使えば、凝った内容とかでなければ、ブラウザを使ってはてダサイト上で行うよりももっと簡単で素早く投稿や編集が行えると思います。
+ 　あ、もちろん対象は自身の(IDとパスワードを知っている)はてダだけです。記事の取得にもID・パスワードが必要です。
 
- �@���݂̓x�[�^�o�[�W�����ł��B���̃o�[�W�����ł̊��m�̕s��Ƃ��āA�폜�����L�����L���ꗗ���j���[�ɕ\�����ꑱ����Ƃ����̂�����A�����������ł�(�폜���̂͐���ɂł��܂��B�܂����e��ҏW�����L���ɂ��Ă͓K�؂Ƀ��j���[�ɔ��f����Ă��܂�)�B
+ 　現在はベータバージョンです。このバージョンでの既知の不具合として、削除した記事が記事一覧メニューに表示され続けるというのがあり、原因調査中です(削除自体は正常にできます。また投稿や編集した記事については適切にメニューに反映されています)。
 
-1-2. ����Ƃ��H
- �@�͂ă_�̋L����������(�����΂������)�A���x���ҏW�E���e���邱�Ƃ������ꍇ�Ȃǂɂ͖��ɗ��Ă�Ǝv���܂��B
- �@�܂��A�G�ۂŕҏW���̕���/�v���O�����\�[�X�����p���邱�Ƃ������悤�ȂƂ���A�L���̕ҏW�E���Ȃ��G�ۂł������ꍇ�ɂ��֗��ɂ��g������������Ǝv���܂��B
- �@�Ȃ��A���̏��S�҂̕��̎g�p�͂����߂��Ă��܂���B
+1-2. だれとく？
+ 　はてダの記事が長文で(文字ばっかりで)、何度も編集・投稿することが多い場合などには役に立てると思います。
+ 　また、秀丸で編集中の文章/プログラムソースを引用することが多いようなときや、記事の編集・推敲を秀丸でしたい場合にも便利にお使いいただけると思います。
+ 　なお、自称初心者の方の使用はお勧めしていません。
 
-1-3. �ŁA��̓I�ȋ@�\�́H
- �@�͂ă_�̓��L�E�������擾�A���e�A�C���A�폜�A�������̌��J�Ȃǂł��BID��p�X���[�h����͂��đ��삵�܂��B
- �@���e�A�C����I�ԂƁA�ҏW���̕��͂̐擪�s���^�C�g���ɁA2�s�ڈȍ~����L�{���ɂ��ď�����i�߂܂��B
- �@�擾�A�C���A�폜����Ƃ��Ƀ��j���[����ΏۂƂȂ�L�����w��ł��܂��B
- �@�������̌��J�́A�������񓖊Y�̉������L�����擾���A�f�[�^�擪�́udraft�v�Ƃ�����������ublog�v�ɕύX������u�C���v��I��������ł��܂��B
+1-3. で、具体的な機能は？
+ 　はてダの日記・下書を取得、投稿、修正、削除、下書きの公開などです。IDやパスワードを入力して操作します。
+ 　投稿、修正を選ぶと、編集中の文章の先頭行をタイトルに、2行目以降を日記本文にして処理を進めます。
+ 　取得、修正、削除するときにメニューから対象となる記事を指定できます。
+ 　下書きの公開は、いったん当該の下書き記事を取得し、データ先頭の「draft」という文字列を「blog」に変更した後「修正」を選択したらできます。
 
-1-4. ����ȊO�̋@�\�́H
- �@���͂̐擪�Ɂudate:�����v�Ƃ����L�ڂ��ꂽ�s������΁A�L�ڂ̓����t���̋L���Ƃ��ē��e���܂��B
- �@���͂̐擪�Ɂublog:�A�J�E���g���v�Ƃ����L�ڂ��ꂽ�s������΁A�L�ڂ�"�A�J�E���g��"�ɑ΂���͂ă_�𑀍삵�܂��B"blog"�ł͂Ȃ�"draft"�ƂȂ��Ă����ꍇ�͉������ɕۑ����܂��B
- �@���̑��A�͂ĂȋL�@��J�e�S��(�^�O)��}������@�\������܂��B
- �@�ڍׂ͔z�z�t�@�C���ɓ�����<d.hatena.mac.html>���������������B
+1-4. それ以外の機能は？
+ 　文章の先頭に「date:日時」とだけ記載された行があれば、記載の日時付けの記事として投稿します。
+ 　文章の先頭に「blog:アカウント名」とだけ記載された行があれば、記載の"アカウント名"に対するはてダを操作します。"blog"ではなく"draft"となっていた場合は下書きに保存します。
+ 　その他、はてな記法やカテゴリ(タグ)を挿入する機能もあります。
+ 　詳細は配布ファイルに同梱の<d.hatena.mac.html>をご覧ください。
 
-1-5. �ł������łł��Ȃ��@�\�͉��H
- �@�͂ă_��AtomPub(AtomAPI)�łł��Ȃ����Ƃ͂��̃}�N���ł��قڂł��܂���BAPI�ł��邱�Ƃ́u�͂ă_�̓��L�E�������Q�ƁA���e�A�ҏW�A�폜�A�������̌��J�v�Ȃ̂ŁA����ȊO�̂��Ƃ͂�����߂Ă��������B
- �@�͂Ăȓ����������N�Ƃ��������ƊȒP�ɂ͂ꂽ�炢���̂ł����A�A�C�f�A���Ȃ��̂ŕۗ��ł��B
- (�͂ă_�̓���̋L���ւ̃����N�Ƃ����Č��ǃu���E�U���J����URI���m���߂Ȃ��Ƃ��߂ł���ˁB�Ȃ񂩂�����Ė{���]�|�Ƃ������A���Ⴀ���̂܂܃u���E�U�ł͂ă_�������΂���������...�B)
+1-5. できそうでできない機能は何？
+ 　はてダのAtomPub(AtomAPI)でできないことはこのマクロでもほぼできません。APIできることは「はてダの日記・下書を参照、投稿、編集、削除、下書きの公開」なので、それ以外のことはあきらめてください。
+ 　はてな内自動リンクとかをもっと簡単にはれたらいいのですが、アイデアがないので保留です。
+ (はてダの特定の記事へのリンクとかって結局ブラウザを開いてURIを確かめないとだめですよね。なんかそれって本末転倒というか、じゃあそのままブラウザではてダを書けばええやんって...。)
 
-1-6. �G���Ȃ���
-1-6-1. �ǂ��Ŏ�ɓ���邱�Ƃ��ł���́H�ǂ������ɓ��ꂽ�����H
- �@��q����<2. �z�z�ꏊ>���������������B
+1-6. 雑多なこと
+1-6-1. どこで手に入れることができるの？どこから手に入れたっけ？
+ 　後述する<2. 配布場所>をご覧ください。
 
-1-6-2. �N������Ă���́H�N�ɘA�������炢���́H
- �@��q����<6. �R���^�N�g�A�T�|�[�g>���������������B
- �@�Ȃ��A��҂̒m���̐���s�����č���Ă��邽�߁A����ȏ�̎��ԂɂȂ�����A�T�|�[�g���\���ɂł��Ȃ��\��������܂��B�܂��A���̂��߁A���̏��S�҂̕��̎g�p�͂����߂��Ă��܂���B
+1-6-2. 誰が作っているの？誰に連絡したらいいの？
+ 　後述する<6. コンタクト、サポート>をご覧ください。
+ 　なお、作者の知識の粋を尽くして作っているため、それ以上の事態になったら、サポートが十分にできない可能性があります。また、そのため、自称初心者の方の使用はお勧めしていません。
 
-1-6-3. ���̊��ł��g���܂����H
- �@��q����<4. �K�v�Ȃ���>���������������B<7. �ӎ��A�ƐӁA���C�Z���X>�����ǂ݂��������B
+1-6-3. 私の環境でも使えますか？
+ 　後述する<4. 必要なもの>をご覧ください。<7. 謝辞、免責、ライセンス>もお読みください。
 
-1-6-4. �C���X�g�[����A���C���X�g�[���A�o�[�W�����A�b�v�̕��@�́H
- �@��q����<5. �C���X�g�[���ƃo�[�W�����A�b�v�A�A���C���X�g�[��>���������������B
+1-6-4. インストールやアンインストール、バージョンアップの方法は？
+ 　後述する<5. インストールとバージョンアップ、アンインストール>をご覧ください。
 
-1-6-5. �g������ݒ���@�́H
- �@�z�z�t�@�C���ɓ�������Ă���<d.hatena.mac.html>���������������B
+1-6-5. 使い方や設定方法は？
+ 　配布ファイルに同梱されている<d.hatena.mac.html>をご覧ください。
 
-1-6-6. ���ŗ������݂����ł��B
- �@�ǂ����Ă��݂����̂Ȃ�A�z�z�t�@�C���ɓ�������Ă���<d.hatena.mac.history.txt>���������������B
- �@�ڍׂȉ��ŗ������m�F�������ꍇ�́A��q����<2. �z�z�ꏊ>�ɋL�ڂ�github�T�C�g��git���|�W�g�������J���Ă��܂��B
+1-6-6. 改版履歴をみたいです。
+ 　どうしてもみたいのなら、配布ファイルに同梱されている<d.hatena.mac.history.txt>をご覧ください。
+ 　詳細な改版履歴を確認したい場合は、後述する<2. 配布場所>に記載のgithubサイトでgitレポジトリも公開しています。
 
 
-2. �z�z�ꏊ
+2. 配布場所
 
- �@�ȉ���URL����_�E�����[�h�ł��܂��B
+ 　以下のURLからダウンロードできます。
  http://hide.maruo.co.jp/lib/macro/d_hatena_mac.html
- �@������Ȃ��ꍇ�́A�ȉ���URL����uhatena�v�ȂǂŌ������Ă݂Ă��������B
+ 　見つからない場合は、以下のURLから「hatena」などで検索してみてください。
  http://hide.maruo.co.jp/lib/macro/index.html
 
- �@�܂��A�ȉ���URL������_�E�����[�h�ł��܂��B
+ 　また、以下のURLからもダウンロードできます。
  http://github.com/taketori/d.hatena.mac/downloads
- �@git�̃��|�W�g�������J���Ă��܂��B
+ 　gitのリポジトリも公開しています。
 
 
-3. �z�z�t�@�C���ɓ�������Ă������
+3. 配布ファイルに同梱されているもの
 
-(�t�H���_�\��)
-�� README.txt                            �uREADME�v�B���̃t�@�C���ł��B
-�� d.hatena.mac.html                     �u�}�j���A���v�B�g������ݒ���@���L�ڂ��Ă��܂��B
-�� d.hatena.mac.history.txt              �u���ŗ����v
-�� d.hatena.mac                          �u���C���}�N���v
-�� d.hatena.mac.makedata.mac             �u�f�[�^�����}�N���v�B
-��                                         �ҏW���̕��͂𓊍e�f�[�^�Ƃ��Đ������܂��B
-�� d.hatena.mac.xml                      �u�f�[�^�ЂȌ`XML�v
-��                                         ��L�}�N���Ŏg����f�[�^�̂ЂȌ`�B
-�� d.hatena.mac.insnotations.mac.sample  �u�͂ĂȋL�@���̓}�N���v�̃T���v���B
-�� d.hatena.mac.ini.sample               �u.INI(����ݒ���L�ڂ����t�@�C��)�v�̃T���v���B
-�� d.hatena.mac.YourID.tags.list.sample  �u�J�e�S���⊮�p�����t�@�C���v�̃T���v���B
-�� d.hatena.mac.Settings.cs.sample       �uID�p�X���[�h�ݒ�t�@�C���v�̃T���v���B
-��src
-     d.hatena.mac.cs                     �u�{�}�N���p���s�t�@�C�� �\�[�X�v
-                                           ���C���}�N�����s����csc.exe���g���ăR���p�C������A
-                                           �������ꂽ���s�t�@�C����p���ĈÍ����Ƃ����܂��B
-     x10d.HidemaruMacro.Date2String.cs   �u�{�}�N���p���s�t�@�C�� ���C�u����Date2String�v
-     x10d.HidemaruMacro.GUI.cs           �u�{�}�N���p���s�t�@�C�� ���C�u����GUI�v
-     x10d.HidemaruMacro.IniIO.cs         �u�{�}�N���p���s�t�@�C�� ���C�u����IniIO�v
-
-
-4. �K�v�Ȃ���
-
- �@�ȉ��̂悤�Ȋ����K�v�ł��B���ɂ����邩������܂��񂪁A��ʓI�ȃ��[�U�Ȃ瑽�����v�ł��傤�B
-
- �E�G�ۃG�f�B�b�^ Ver 8.02�ȏオ���삷��B
- �E�G�ۃG�f�B�b�^����DLL�ECOM�Ecmd.exe�Ecsc.exe(.NET Framework 1.1.4322�ȏ�)�� �ǂݏo���E���s���ł��A�ҏW���̃t�@�C���E�͂Ăȃ_�C�A���̓ǂݏo���E�������݂��ł��A�{�}�N���̂���t�H���_�Ƃ��̔z���̃t�H���_�ɂăt�@�C�����쐬�E���s�E�������݂ł��� ���B
-
-   .NET Framework �� WindowsXP SP2�ȏ�Ȃ�قڊm���ɃC���X�g�[������Ă���Ǝv���܂��B
-
-5. �C���X�g�[���ƃo�[�W�����A�b�v�A�A���C���X�g�[��
-
- 1. �C���X�g�[���͑��̏G�ۃG�f�B�b�^�p�̃}�N���Ɠ��l�ł��B
-  �@�z�z�t�@�C���ɓ����̑S�Ẵt�@�C�����A�����t�H���_��(�t�H���_�\����ۂ����܂�)�W�J���Ă��������B
-
- 2. �z�z�t�@�C���ɓ�����d.hatena.mac.Settings.cs.sample�́A(�R�s�[����)�������ăt�@�C����������".sample"���폜���Ă��������B
-  �@�O�ud.hatena.mac.Settings.cs.sample�v���ud.hatena.mac.Settings.cs�v
-
-  �@���̑��A�K�{�ł͂���܂��񂪂������߂��鏀��������܂��B�ڍׂ͓����̃}�j���A��<d.hatena.mac.html>���������������B
-
- �E�g�����A�ݒ���@�́A�����̃}�j���A�����������������B
-
- �E�o�[�W�����A�b�v���̒���
- �@���C���}�N����ID�Ȃǂ��L�ڂ����ꍇ�́A�}�N�����C���X�g�[�����邽�тɐݒ肵�����K�v������܂��B
-
- �E�A���C���X�g�[�����̂��m�点
- �@���W�X�g���ɂ͏�������ł��܂���B�܂��A�}�N���Ɠ����t�H���_�ȊO�ɂ̓t�@�C�������܂���B
+(フォルダ構造)
+│ README.txt                            「README」。このファイルです。
+│ d.hatena.mac.html                     「マニュアル」。使い方や設定方法を記載しています。
+│ d.hatena.mac.history.txt              「改版履歴」
+│ d.hatena.mac                          「メインマクロ」
+│ d.hatena.mac.makedata.mac             「データ生成マクロ」。
+│                                         編集中の文章を投稿データとして生成します。
+│ d.hatena.mac.xml                      「データひな形XML」
+│                                         上記マクロで使われるデータのひな形。
+│ d.hatena.mac.insnotations.mac.sample  「はてな記法入力マクロ」のサンプル。
+│ d.hatena.mac.ini.sample               「.INI(動作設定を記載したファイル)」のサンプル。
+│ d.hatena.mac.YourID.tags.list.sample  「カテゴリ補完用辞書ファイル」のサンプル。
+│ d.hatena.mac.Settings.cs.sample       「IDパスワード設定ファイル」のサンプル。
+└src
+     d.hatena.mac.cs                     「本マクロ用実行ファイル ソース」
+                                           メインマクロ実行時にcsc.exeを使ってコンパイルされ、
+                                           生成された実行ファイルを用いて暗号化とかします。
+     x10d.HidemaruMacro.Date2String.cs   「本マクロ用実行ファイル ライブラリDate2String」
+     x10d.HidemaruMacro.GUI.cs           「本マクロ用実行ファイル ライブラリGUI」
+     x10d.HidemaruMacro.IniIO.cs         「本マクロ用実行ファイル ライブラリIniIO」
 
 
-6. �R���^�N�g�A�T�|�[�g
-6-1. �s��񍐋y�їv�]�Ȃǂł̘A����
+4. 必要なもの
 
- �@���[����f���ł��₢���킹�̍ۂ́A�{�}�N���ɂ��Ăł��邱�Ƃ��킩��悤�ɁA�薼�Ƀ}�N�����𕹋L���Ă��������B
+ 　以下のような環境が必要です。他にもあるかもしれませんが、一般的なユーザなら多分大丈夫でしょう。
 
- �Etwitter
+ ・秀丸エディッタ Ver 8.02以上が動作する。
+ ・秀丸エディッタ同梱DLL・COM・cmd.exe・csc.exe(.NET Framework 1.1.4322以上)の 読み出し・実行ができ、編集中のファイル・はてなダイアリの読み出し・書き込みができ、本マクロのあるフォルダとその配下のフォルダにてファイルを作成・実行・書き込みできる 環境。
+
+   .NET Framework は WindowsXP SP2以上ならほぼ確実にインストールされていると思います。
+
+5. インストールとバージョンアップ、アンインストール
+
+ 1. インストールは他の秀丸エディッタ用のマクロと同様です。
+  　配布ファイルに同梱の全てのファイルを、同じフォルダに(フォルダ構造を保ったまま)展開してください。
+
+ 2. 配布ファイルに同梱のd.hatena.mac.Settings.cs.sampleは、(コピーして)改名してファイル名末尾の".sample"を削除してください。
+  　前「d.hatena.mac.Settings.cs.sample」→「d.hatena.mac.Settings.cs」
+
+  　その他、必須ではありませんがおすすめする準備があります。詳細は同梱のマニュアル<d.hatena.mac.html>をご覧ください。
+
+ ・使い方、設定方法は、同梱のマニュアルをご覧ください。
+
+ ・バージョンアップ時の注意
+ 　メインマクロにIDなどを記載した場合は、マクロをインストールするたびに設定し直す必要があります。
+
+ ・アンインストール時のお知らせ
+ 　レジストリには書き込んでいません。また、マクロと同じフォルダ以外にはファイルを作りません。
+
+
+6. コンタクト、サポート
+6-1. 不具合報告及び要望などでの連絡先
+
+ 　メールや掲示板でお問い合わせの際は、本マクロについてであることがわかるように、題名にマクロ名を併記してください。
+
+ ・twitter
    http://www.twitter.com/x10d/
 
- �E���[��
-   src��x10d.jp (���𔼊p�ɕύX���Ă��瑗�M���Ă��������B)
+ ・メール
+   src＠x10d.jp (＠を半角に変更してから送信してください。)
 
- �E�f����: �R�~���j�e�b�N�X�u4. ���J�}�N�� �T�|�[�g��c���i�G�ۃG�f�B�^�֘A�j�v
+ ・掲示板: コミュニテックス「4. 公開マクロ サポート会議室（秀丸エディタ関連）」
    http://www.maruo.co.jp/turukame/4/index.html
 
- �Egithub�̃��|�W�g��
+ ・githubのレポジトリ
    http://github.com/taketori/d.hatena.mac/
-   Issues���ǂ����B
+   Issuesもどうぞ。
 
-6-2. ����ȊO�̓��e�ō�҂ɘA������肽���ꍇ�́A�ȉ��̕��@�ŁB
+6-2. それ以外の内容で作者に連絡を取りたい場合は、以下の方法で。
 
- �Etwitter
+ ・twitter
    http://www.twitter.com/x10d/
 
- �E���[��
-   taketori��x10d.jp (���𔼊p�ɕύX���Ă��瑗�M���Ă��������B)
+ ・メール
+   taketori＠x10d.jp (＠を半角に変更してから送信してください。)
 
 
-7. �ӎ��A�ƐӁA���C�Z���X
+7. 謝辞、免責、ライセンス
 
- �@���Ɉȉ��̊F�l�Ɋ��Ӑ\���グ�܂��B
- �E�G�ۋy�т��̊֘ADLL�A�y�ъ����֗̕��ȃ}�N�����쐬�����J����Ă����҂̊F�l�B
- �EWindows��G�ۂ̃}�N���AWSH�����C#�ɂ��Ē������A�����܂Ƃ߁A���J����Ă���F�l�B
- �E���̃}�N�������g�����������A�t�B�[�h�o�b�N���Ă����������F�l�B
+ 　特に以下の皆様に感謝申し上げます。
+ ・秀丸及びその関連DLL、及び幾多の便利なマクロを作成し公開されている作者の皆様。
+ ・Windowsや秀丸のマクロ、WSHおよびC#について調査し、情報をまとめ、公開されている皆様。
+ ・このマクロをお使いいただき、フィードバックしていただいた皆様。
 
- �@��҂̒m���̐���s�����č���Ă��邽�߁A����ȏ�̎��ԂɂȂ�����A�T�|�[�g���\���ɂł��Ȃ��\��������܂��B�܂��A���̂��߁A���̏��S�҂̕��̎g�p�͂����߂��Ă��܂���B
- �@���̃}�N���Ɋւ����؂̕s�s���ɂ��āA��҂͂��̐ӂ𕉂��܂���B
- �@�ڍׂ́A�������Q�Ƃ��Ă��������B
+ 　作者の知識の粋を尽くして作っているため、それ以上の事態になったら、サポートが十分にできない可能性があります。また、そのため、自称初心者の方の使用はお勧めしていません。
+ 　このマクロに関する一切の不都合について、作者はその責を負いません。
+ 　詳細は、次項を参照してください。
 
-7-1. �ƐӁA���C�Z���X����
+7-1. 免責、ライセンス条項
 
- ���쌠�́A�� "�����Ƃ�"�A"taketori"�A�y�� "x10d.jp" ��2010�N����ۗL���Ă��܂��B
- ���C�Z���X�́A������u�C��BSD�v�ł��B
+ 著作権は、私 "たけとり"、"taketori"、及び "x10d.jp" が2010年から保有しています。
+ ライセンスは、いわゆる「修正BSD」です。
 
- Copyright (c) 2010, �����Ƃ�
+ Copyright (c) 2010, たけとり
  All rights reserved.
- �\�[�X�R�[�h�`�����o�C�i���`�����A�ύX���邩���Ȃ������킸�A�ȉ��̏����𖞂����ꍇ�Ɍ���A�ĔЕz����юg�p��������܂��B
+ ソースコード形式かバイナリ形式か、変更するかしないかを問わず、以下の条件を満たす場合に限り、再頒布および使用が許可されます。
 
- �\�[�X�R�[�h���ĔЕz����ꍇ�A��L�̒��쌠�\���A�{�����ꗗ�A����щ��L�Ɛӏ������܂߂邱�ƁB
- �o�C�i���`���ōĔЕz����ꍇ�A�Еz���ɕt���̃h�L�������g���̎����ɁA��L�̒��쌠�\���A�{�����ꗗ�A����щ��L�Ɛӏ������܂߂邱�ƁB
- ���ʂɂ����ʂ̋��Ȃ��ɁA�{�\�t�g�E�F�A����h���������i�̐�`�܂��͔̔����i�ɁA�����Ƃ�y��taketori�A���т�x10d�Ax10d.jp�A�y�уG�N�X�e���h�A�G�N�X�e���h�E�W���p���̖��O�܂��̓R���g���r���[�^�[�̖��O���g�p���Ă͂Ȃ�Ȃ��B
- �{�\�t�g�E�F�A�́A���쌠�҂���уR���g���r���[�^�[�ɂ���āu����̂܂܁v�񋟂���Ă���A�����َ����킸�A���ƓI�Ȏg�p�\���A����ѓ���̖ړI�ɑ΂���K�����Ɋւ���Öق̕ۏ؂��܂߁A�܂�����Ɍ��肳��Ȃ��A�����Ȃ�ۏ؂�����܂���B���쌠�҂��R���g���r���[�^�[���A���R�̂�������킸�A ���Q�����̌�����������킸�A���ӔC�̍������_��ł��邩���i�ӔC�ł��邩�i�ߎ����̑��́j�s�@�s�ׂł��邩���킸�A���ɂ��̂悤�ȑ��Q����������\����m�炳��Ă����Ƃ��Ă��A�{�\�t�g�E�F�A�̎g�p�ɂ���Ĕ��������i��֕i�܂��͑�p�T�[�r�X�̒��B�A�g�p�̑r���A�f�[�^�̑r���A���v�̑r���A�Ɩ��̒��f���܂߁A�܂�����Ɍ��肳��Ȃ��j���ڑ��Q�A�Ԑڑ��Q�A�����I�ȑ��Q�A���ʑ��Q�A�����I���Q�A�܂��͌��ʑ��Q�ɂ��āA��ؐӔC�𕉂�Ȃ����̂Ƃ��܂��B
+ ソースコードを再頒布する場合、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
+ バイナリ形式で再頒布する場合、頒布物に付属のドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
+ 書面による特別の許可なしに、本ソフトウェアから派生した製品の宣伝または販売促進に、たけとり及びtaketori、並びにx10d、x10d.jp、及びエクステンド、エクステンド・ジャパンの名前またはコントリビューターの名前を使用してはならない。
+ 本ソフトウェアは、著作権者およびコントリビューターによって「現状のまま」提供されており、明示黙示を問わず、商業的な使用可能性、および特定の目的に対する適合性に関する暗黙の保証も含め、またそれに限定されない、いかなる保証もありません。著作権者もコントリビューターも、事由のいかんを問わず、 損害発生の原因いかんを問わず、かつ責任の根拠が契約であるか厳格責任であるか（過失その他の）不法行為であるかを問わず、仮にそのような損害が発生する可能性を知らされていたとしても、本ソフトウェアの使用によって発生した（代替品または代用サービスの調達、使用の喪失、データの喪失、利益の喪失、業務の中断も含め、またそれに限定されない）直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。
 
 EOF
