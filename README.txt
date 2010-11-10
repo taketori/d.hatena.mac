@@ -1,5 +1,6 @@
                                   d.hatena.mac
                             はてなダイアリー用マクロ
+                                Ver 1.0.0 beta 3
                           秀丸 Ver.8 (8.02以上) 専用版
 
 　これは、d.hatena.macのreadmeファイル<README.txt>です。
