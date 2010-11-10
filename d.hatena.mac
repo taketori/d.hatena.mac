@@ -40,13 +40,13 @@ INIT:
 
 MAIN:
 
-	##char = inputchar($mn + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0) + ": Press [p]ost, [g]et, [m]odify, [d]elete or [h]elp.");
-	if     (##char == 'p')	call post $$ini;
-	else if(##char == 'g')	call get_entry $$ini;
-	else if(##char == 'm')	call mod_entry $$ini;
-	else if(##char == 'd')	call del_entry $$ini;
-	else if(##char == 'h')	call disp_help;
-	else 										call disp_help;
+	title $mn + "id:" + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0);
+	menu "投稿(&P)", "取得(&G)", "修正(&M)", "削除(&D)", "\x01", "ヘルプ(&H)";
+	if     (result == 1)	call post $$ini;
+	else if(result == 2)	call get_entry $$ini;
+	else if(result == 3)	call mod_entry $$ini;
+	else if(result == 4)	call del_entry $$ini;
+	else if(result == 5)	call disp_help;
 
 EXIT:
 
@@ -66,8 +66,8 @@ disp_help:
 
 	message $mn + "\n"
 	      + "使い方:\n"
-	      + "マクロを起動してから、[ ]内のいずれかのキーを押下する。\n"
-	      + "[p]=投稿、[g]=取得、[m]=修正、[d]=消去、[h]=ヘルプ(この画面)\n"
+	      + "メニューから択一するか、[ ]内のいずれかのキーを押下する。\n"
+	      + "[p]=投稿、[g]=取得、[m]=修正、[d]=消去、[h]=ヘルプ(この画面)、[ESC]=中止\n"
 	      + "\n"
 	      + "投稿:\t範囲選択をしておくと、その範囲の1行目をタイトルに、2行目以降を本文にします。\n"
 	      + "\t範囲選択していない場合は、編集中の文章すべてを対象にします。\n"
@@ -214,7 +214,7 @@ get_list:
 	// 2ページ以降の時は、前のページへの案内をつける。
 	##i = 0;
 	if(1 < ##2){
-		$$menu[##i] = "&b <--- 前の20件 ---";
+		$$menu[##i] = "(&b) <--- 前の20件 ---";
 		##i = ##i + 1;
 	}
 
@@ -227,20 +227,21 @@ get_list:
 	##items = member(##entrys, "length");
 	while(##i < ##items + (1 < ##2)){
 		##entry = getcollection(##entrys);
-		$$menu[##i] = "&" + midstr($$_, ##i, 1) + " " + member(member(##entry, "selectSingleNode", "title"), "text");
+		$$menu[##i] = "(&" + midstr($$_, ##i, 1) + ") "
+		            + member(member(##entry, "selectSingleNode", "title"), "text");
 		$$uri[##i] = member(member(##entry, "selectSingleNode", "link"), "getAttribute", "href");
 		##i = ##i + 1;
 	}
 
 	// このページで20件あるときは次のページもあると見なして、次のページへの案内をつける。
 	if(##items == 20){
-		$$menu[##i] = "&n --- 次の20件 --->";
+		$$menu[##i] = "(&n) --- 次の20件 --->";
 		##i = ##i + 1;
 	}
 
 	// 日記と下書きの表示変更
 	$$menu[##i] = "\x01";
-	$$menu[##i + 1] = "&z 日記 <--> 下書き";
+	$$menu[##i + 1] = "(&z) 日記 <--> 下書き";
 	##i = ##i + 2;
 
 	// メニューを表示する。
