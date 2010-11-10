@@ -1,0 +1,292 @@
+// d.hatena.mac.insnotations.mac
+
+	$NotationsURL = "http://hatenadiary.g.hatena.ne.jp/keyword/%E3%81%AF%E3%81%A6%E3%81%AA%E8%A8%98%E6%B3%95%E4%B8%80%E8%A6%A7";
+	$FuncName = "make_menu";		// ここを変更したら、MAIN関数内の //***** で囲まれた部分も変更する。
+
+INIT:
+
+	if(argcount < 2)	endmacro "引数が不正です。";
+	$mn    = getarg(0);				// マクロの名前
+	$$main = getarg(1);				// メインマクロのフルパス
+
+MAIN:
+
+	title $mn + "入力したいはてな記法を選択してください。";
+	//*****
+	call make_menu;
+	//*****
+	menuarray $menu, ##return;
+	if(!result)	endmacro;
+	##res = result - 1;
+	if($nota[##res] == ""){
+		// メニューの再構築。
+		//NOTE: $nota[##res] == ""となるのは現状では再構築コマンドだけ。
+		title $mn + currentmacrofilename + "を開いてメニューの再構築をしています。しばらくお待ちください。";
+		##hdlStart = hidemaruhandle(0);
+		openfile "/z /n /h /je /m5 " + currentmacrofilename;		// ステルス秀丸でカーソルは文章末。
+		saveas $$main + ".insnotations.mac", sjis, cr, lf, noaddhist;
+		##hdlINM = hidemaruhandle(0);
+		call gen_func;
+		setactivehidemaru ##hdlStart;
+		closehidemaru ##hdlINM;
+		endmacro $$return;
+	}
+
+	// サブメニューを表示する。
+	menuarray $menu[##res], val($nota[##res]);
+	if(!result)	endmacro;
+	$$kihou = $nota[##res][result - 1];
+
+	// 1つの記法で複数の書式がある場合、メニューでそれらを択一する。
+	if(-2 < strstr($$kihou, ", ") + strstr($$kihou, "、")){
+		title $mn + $menu[##res][result - 1];
+		call disp_notamenu $$kihou;
+		$$kihou = $$return;
+	}
+	call ins_kihou $$kihou;
+
+endmacro;
+
+disp_notamenu:
+// 記法を", "や"、"で個別に分解して、それらをメニューとして表示する。
+//arg: $1:記法となる文字列
+//ret: 選択したメニューの内容(項目名)。選択しなかったら""。失敗したら終了。
+
+	call load_dll;
+	##dll = ##return;
+
+	##i = 0;
+	$$reg = "([^,、]+)(, |、)";
+	##pos = dllfunc(##dll, "FindRegular", $$reg, $$1 + "、", 0);
+	while(0 <= ##pos){
+		##len = dllfunc(##dll, "GetLastMatchLength");
+		$$nmenu[##i] = midstr($$1, ##pos, ##len - dllfunc(##dll, "GetLastMatchTagLength", 2));
+		##pos = dllfunc(##dll, "FindRegular", $$reg, $$1 + "、", ##pos + ##len);
+		##i = ##i + 1;
+	}
+	menuarray $$nmenu, ##i;
+	if(!result)	endmacro;
+	$$ret = $$nmenu[result - 1];
+
+	freedll ##dll;
+
+return $$ret;
+
+ins_kihou:
+//arg: $書式
+
+	$$kihou = $$1;
+
+	// 書式内の全角文字列を選択範囲で置換する。
+	##size = 3000;		// 文字列変数の扱えるサイズ。安全を見込んで4kより少なめ。
+	if((selecting | rectselecting | lineselecting)
+	&& charcount(0x1 | 0x100 | 0x100000 | 0x80000000) < ##size){
+		call replace_zenkaku $$kihou;
+		$$kihou = $$return;
+	}
+
+	// 実際に挿入する。
+	begingroupundo;
+	##x = x;	##y = y;
+	insertfix $$kihou;
+	searchdown2 "[^\\x01-\\x7e]+", regular, nohilight;		// ascii以外。文字コードによらずいけるっぽいが検証は完全ではない。
+	if(result == false
+	|| strlen($$kihou) < strlen(gettext(##x, ##y, foundendx, foundendy, 1))){
+		// 入力部分末尾にカーソルを移動する。
+		gosearchstarted;
+		right strlen($$kihou);
+	}else if(gettext(foundtopx, foundtopy, foundendx, foundendy, 1) == "～～"){
+		// 最初の波線を削除する。
+		delete;
+	}
+	endgroupundo;
+
+return;
+
+load_dll:
+//ret: DLLの識別値。失敗したら終了。
+
+	// hmjre.dllをロードする。
+	$$hmjre = hidemarudir + "\\hmjre.dll";
+	##hmjre_ver = 0x304;		// なるべく新しいものを。
+	$$dll = loaddllfile;
+	if(rightstr($$dll, 9) == "hmjre.dll"){
+		// 多少もたついてでも再読込する。DLL関係の文と関数が混在すると面倒くさいので。
+		freedll;
+		##dll = loaddll($$dll);
+	}else{
+		##dll = loaddll($$hmjre);
+	}
+	if(!##dll)	endmacro $$hmjre + "のロードに失敗しました。";
+	if(dllfunc(##dll, "JreGetVersion") & 0xFFFF < ##hmjre_ver)	endmacro $$hmjre + "のバージョンが古すぎます。";
+
+return ##dll;
+
+gen_func:
+// はてなからHTMLをGETして、($FuncName)関数としてデータを挿入する。
+//NOTE: 確保したCOMはアクティブ秀丸を切り替えると失効する。
+//arg: --
+//ARG: $NotationsURL, $mn
+//ret: $エラー内容。"1"=関数生成に成功した。
+
+	// データ取得
+	call open_http "GET", $NotationsURL;
+	if(!##return)	return "はてなからデータのGETに失敗しました。";
+
+	// HTMLを解析する。
+	title $mn + "はてなから取得したHTMLファイルの解析中。";
+	##html = createobject("htmlfile");
+	if(!##html)	return "MSHTMLオブジェクトの確保に失敗しました。";
+	callmethod ##html, "write", getpropstr(##return, "ResponseText");
+	if(!getresultex(10))	return "MSHTMLオブジェクトにデータを挿入するのに失敗しました。";
+
+	// 既存データの削除。
+	beginsel;
+	searchup2 "^\\Q" + $FuncName + "\\E:$", regular;
+	if(!result)	return currentmacrofilename + "に、\n\t" + $FuncName + ":\nが見つかりません。";
+	delete;
+	##l = lineno;
+	// このマクロ末尾にデータを挿入して保存して閉じる。
+	title $mn + currentmacrofilename + "にデータを挿入中。";
+	call ins_str ##html;
+	call mod_macro ##l;
+	title $mn + currentmacrofilename + "を上書き保存して閉じています。";
+	save;
+
+return "1";
+
+open_http:
+// WinHTTP.HTTPRequestのopenメソッドを呼び出す。
+//arg: $1:接続方法(POST/GET), $2:URL
+//ARG: $mn
+//ret: 0=何かエラー。0以外=WinHttpRequestで取得したオブジェクトの番号。
+
+	title $mn + $$1 + "のために接続 " + $$2;
+	##objHttp = createobject("WinHttp.WinHttpRequest.5.1");
+	if(!##objHttp)	##objHttp = createobject("WinHttp.WinHttpRequest");
+	if(!##objHttp)	return 0;
+
+	callmethod ##objHttp, "Open", $$1, $$2, 0;
+	callmethod ##objHttp, "Send";
+	title $mn + "WinHttp : " + getpropstr(##objHttp, "StatusText");
+
+return ##objHttp * (getpropnum(##objHttp, "Status") == 200);
+
+ins_str:
+// 文字列挿入を実際に行う。
+//arg: #1:WinHttpRequestで取得したオブジェクトの番号
+
+	insert $FuncName + ":\n\n"
+	     + "\t##mi = 0;\n"/* 記法の種類数(メイン項目数)初期値 */
+	     + "\t//begin inserted items\n\n";
+
+	##h4s  = member(##1, "GetElementsByTagName", "h4");
+	##tbls = member(##1, "GetElementsByTagName", "table");
+	##h4   = getcollection(##h4s);
+	##tbl  = getcollection(##tbls);
+	while(##h4 && ##tbl){		// 記法名(tableタグ)ごとの処理
+		$$str = "\t$menu[##mi] = \"" + member(##h4, "outerText") + "\";\n";/* 記法の種類(メイン項目名) */
+
+		##trs = member(##tbl, "GetElementsByTagName", "tr");
+		##tr  = getcollection(##trs, 1, 1);		//thをスキップ。
+		##tr  = getcollection(##trs);
+		##l   = 0;
+		while(##tr){					// 書式(trタグ)ごとの処理
+			##tds = member(##tr, "cells");
+			##td  = getcollection(##tds);
+			$$str = $$str
+			      + "\t$menu[##mi][" + str(##l) + "] = \"" + member(##td, "outerText") + "\";\n"/* 記法名(サブ項目名) */
+			      + "\t$nota[##mi][" + str(##l) + "] = \"" + member(getcollection(##tds), "outerText") + "\";\n";/* 書式 */
+			##l = ##l + 1;
+			##td  = getcollection(##tds, 3);
+			##tr  = getcollection(##trs);
+		}
+		##tr  = getcollection(##trs, 3);
+
+		insert $$str
+		     + "\t$nota[##mi] = \"" + str(##l) + "\";\n"/* 記法名の数(サブ項目数) */
+		     + "\t##mi = ##mi + 1;\n"/* メイン項目数繰り上げ */
+		     + "\t//rescent\n\n\n";/* 履歴用マーカー */
+		##h4   = getcollection(##h4s);
+		##tbl  = getcollection(##tbls);
+	}
+	##h4   = getcollection(##h4s, 3);
+	##tbl  = getcollection(##tbls, 3);
+
+	insert "\t//end inserted items\n"
+	     + "\t$menu[##mi] = \"\\x01\";\n"/* セパレータ */
+	     + "\t##mi = ##mi + 1;\n"
+	       /* メニュー再構築用項目 */
+	     + "\t$menu[##mi] = \"(&R)\tデータ取得してメニュー再構築\";\n"
+	     + "\t$nota[##mi] = \"\";\n"
+	     + "\t##mi = ##mi + 1;\n\n"
+	     + "return ##mi;\n";/* 関数終了(return) */
+
+return;
+
+mod_macro:
+// そのままマクロとして使うには不適切な文字や文章構造を是正する。
+//arg: #関数先頭の論理行番号
+
+	// 文字定数内の " 記号対策
+	beginsel;
+	moveto2 0, ##1;
+	replaceallfast "(?<! )\"(?!;)", "\\\\\"", regular, inselect;
+	// 文字定数内の改行(TDタグ内の<br>)対策
+	gosearchstarted;
+	beginsel;
+	gofileend;
+	replaceallfast "(?\\1)(\\n)[^r\\t\\n]", ", ", regular, inselect;
+	// "～"っぽい文字(Unicodeの0x301C)対策
+	replaceallfast "[\\u301C]+", "～～", regular, inselect;
+	endsel;
+
+return;
+
+replace_zenkaku:
+// 書式中の全角記号を選択範囲で置換する。
+//arg: 書式
+//ret: 置換後の書式
+
+	call load_dll;
+	##dll = ##return;
+
+	// すべての"。。"を選択範囲全体と置換する。
+	$$ret = dllfuncstr(##dll, "ReplaceRegular", "\\s*。。\\s*", $$1, 0,
+	                   "\\n" + gettext(seltopx, seltopy, selendx, selendy, 1) + "\\n", 1);
+
+	// "～～"を選択範囲1行ずつと置換する(書式内に"～～"が複数あっても最初の1つだけ)。
+	##pos = dllfunc(##dll, "FindRegular", "\\s*～～\\s*", $$1, 0);
+	if(0 <= ##pos){
+		$$bfr = leftstr($$1, ##pos);
+		$$aft = midstr($$1, ##pos +  dllfunc(##dll, "GetLastMatchLength"), );
+		$$sel = gettext(seltopx, seltopy, selendx, selendy, 1);
+		$$reg = "([^\\r\\n]+)([\\r\\n]*)";
+		##pos = dllfunc(##dll, "FindRegular", $$reg, $$sel, 0);
+		while(0 <= ##pos){
+			##len1 = dllfunc(##dll, "GetLastMatchTagLength", 1);
+			##len2 = dllfunc(##dll, "GetLastMatchTagLength", 2);
+			$$ret  = $$ret
+			       + $$bfr + midstr($$sel, ##pos, ##len1) + $$aft
+			       + midstr($$sel, ##pos + ##len1, ##len2)/*改行*/;
+			##pos  = dllfunc(##dll, "FindRegular", $$reg, $$sel, ##pos + ##len1);
+		}
+	}
+
+	freedll ##dll;
+
+return $$ret;
+
+make_menu:
+
+	##mi = 0;
+	//begin inserted items
+
+	//end inserted items
+	$menu[##mi] = "\x01";
+	##mi = ##mi + 1;
+	$menu[##mi] = "(&R)	データ取得してメニュー再構築";
+	$nota[##mi] = "";
+	##mi = ##mi + 1;
+
+return ##mi;

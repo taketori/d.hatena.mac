@@ -41,20 +41,25 @@ INIT:
 MAIN:
 
 	title $mn + "id:" + getstaticvariable("x10d_" + currentmacrobasename + "_user", 0);
-	menu "投稿(&P)", "取得(&G)", "修正(&M)", "削除(&D)", "カテゴリ(&C)", "\x01", "ヘルプ(&H)";
+	menu "投稿(&P)", "取得(&G)", "修正(&M)", "削除(&D)", "カテゴリ(&C)", "はてな記法(&K)", "\x01", "ヘルプ(&H)";
 	if     (result == 1)	call post $$ini;
 	else if(result == 2)	call get_entry $$ini;
 	else if(result == 3)	call mod_entry $$ini;
 	else if(result == 4)	call del_entry $$ini;
 	else if(result == 5)	call ins_tags $$ini;
-	else if(result == 6)	call disp_help;
+	else if(result == 6)	call ins_notations $$ini;
+	else if(result == 7)	call disp_help;
 
 EXIT:
 
 	if($$1 != "")	message $mn + "\n" + $$1;
 
-	escape;
-	moveto #_[0], #_[1];
+	if(!##return){
+		escape;
+		moveto #_[0], #_[1];
+	}
+	setsearch $_[0], #_[2];
+	setsearchhist 0, $_[1];
 	if( #_[5] )	overwriteswitch;
 	if( #_[6] )	browsemodeswitch;
 	if( #_[7] )	readonlyswitch;
@@ -168,7 +173,7 @@ mod_entry:
 			$$uri = $$return;
 		}
 		question $mn + "修正していいですか。";
-		if(!result)	return;
+		if(!result)	return 0;
 	}else{
 		call runex_to currentmacrofilename + ".exe msgbox \"" + $mn + "\" "
 		              + "\"URIの記事を現在編集中の内容で上書き後、日記として公開しますか。\n"
@@ -202,7 +207,7 @@ del_entry:
 	}
 	title $mn;
 	question $mn + "本当に削除しますか。\n" + $$uri;
-	if(!result)	return;
+	if(!result)	return 0;
 	call connect_hatena "DELETE", $$uri, 0, $$1;		//失敗の時はマクロ終了。
 	message $mn + "\n削除しました。";
 
@@ -513,3 +518,24 @@ ins_tags:
 	#_[1] = y;
 
 return 0;
+
+ins_notations:
+// はてな記法を入力する。
+//arg: --
+//ret: (失敗したら終了)
+
+	$$sub_mac = currentmacrofilename + ".insnotations.mac";
+	if(!existfile($$sub_mac)){
+		if(existfile($$sub_mac + ".sample"))	$$sub_mac = $$sub_mac + ".sample";
+		else	call EXIT $$sub_mac + "がないので続行できません。";
+	}
+
+	$$r = replacebuffer;
+	execmacro $$sub_mac, $mn, currentmacrofilename;
+	setreplace $$r;
+
+	$$ret = getresultex(-1);
+	if(3 <= strlen($$ret))	call EXIT $$ret;			// 3文字以上ならたぶんエラーメッセージ。
+	else if("1" == $$ret)		call ins_notations;		// 1=マクロを自己生成した。
+
+return 1;
