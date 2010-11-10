@@ -1,0 +1,494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+ 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+<head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
+ 
+	<title>d.hatena.macマニュアル</title> 
+	
+	<style type="text/css"> 
+    body {
+       margin-top: 1.0em;
+       background-color: #cbfbdb;
+       font-family: "Helvetica,Arial,FreeSans";
+       color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 700px;
+    }
+    h2 { text-align: center; font-size: 1.5em; color: #340424; background-color: #a9d9a9; 
+          margin-top: 1.5em;
+          border-top: 2px solid green; border-bottom: 2px solid green; }
+    h3 { padding-left: 5%; padding-top: 2px; color: #340424; border-top: 1px solid #448444; }
+    h4 { margin-left: 5%; padding-top: 2px; color: #340424; border-top: 1px solid gray; }
+    h5 { margin-left: 3%; color: #340424; }
+    pre { background: #000; color: #fff; margin-left: 3%;  padding: .5em; border-radius: .4em;}
+    p { margin-left: 3%; color: #340424; }
+    code { margin-left: 2px; margin-right: 2px;  padding-left: 5px; padding-right: 5px;
+             background: #000; color: #fff;  border-radius: 3px;}
+    kbd {   margin-left: 2px; margin-right: 2px;  padding-left: .7ex; padding-right: .7ex; border: inset .2em; background-color: white; }
+    .file {  border-bottom: 1px dotted blue;  font-family: monospace;  }
+    .key { margin: 0 3px;  padding: 0 5px;  border-width: 1px 2px 3px 1px;  border-style: solid;  
+            border-color: #999;  font-family: monospace;  border-radius: 4px;}
+	</style> 
+	
+</head> 
+<body>
+<h1>はてなダイアリー用マクロ　マニュアル(d.hatena.mac.html)</h1>
+
+<p>　これは、はてなダイアリー用マクロ(以下「本マクロ」) のマニュアル(<span class="file">d.hatena.mac.html</span>)です。</p>
+
+<p>　マクロの概要は、配布ファイルに同梱の<span class="file">README.txt</span>をごらんください。秀丸の「マクロ登録」コマンドではメインマクロ(<span class="file">d.hatena.mac</span>)を登録してください。</p>
+
+<p>　<strong>凡例</strong>：<span class="file">ファイルやフォルダの名前</span>、<code>出力やファイルの内容</code>、<kbd>入力内容</kbd>、<span class="key">押下するキー</span>。</p>
+
+<hr />
+
+<p>目次</p>
+
+<ul>
+<li><a href="#Prep">準備</a>：本マクロを初めて起動する前にいくつかするべき準備があります。
+<ul><li>必須の準備：ここに記載の内容は新規インストール後に必ず行ってください。</li>
+<li>おすすめする準備：この項目はしてもしなくてもいいけど、した方が断然便利になる準備です。</li></ul></li>
+<li><a href="#HowToUse">使い方</a>：本マクロの大まかな流れを説明します。
+<ul><li><a href="#Post">投稿</a>：秀丸で編集中の内容(範囲選択していたらその範囲)を、はてダの日記に投稿したり下書きとして保存します。</li>
+<li><a href="#Get">取得</a>：記事の一覧をメニューで表示します。選択された記事を取得します。</li>
+<li><a href="#Mod">修正</a>：秀丸で編集中の内容(範囲選択していたらその範囲)を、既存の日記や下書きに上書きします。</li>
+<li><a href="#Del">削除</a>：はてダの記事を削除します。</li>
+<li><a href="#Nota">はてな記法を挿入</a>：はてな記法の一覧をメニューで表示します。選択した記法を入力します。 <br />
+<a href="#PrepNota">はてな記法の挿入準備</a>：この機能を使うには準備をしないといけないです。</li>
+<li><a href="#Tag">カテゴリ(タグ)を挿入</a>：各タイトルに記載するカテゴリーを挿入します。 <br />
+<a href="#PrepTag">準備</a>：この機能を使うには準備をした方がいいです。</li></ul></li>
+<li><a href="#Format">データ形式について</a>：日記として用いられる文章の形式について説明します。</li>
+<li><a href="#Ini">設定</a>：マクロの動作を任意で変更できる各種の設定について説明します。</li>
+<li><a href="#Material">資料</a>：動作とかそういう内部的な話です。
+<ul><li><a href="#ID">はてダIDの決定順序</a>：</li>
+<li><a href="#Compile">コンパイルについて</a>：</li></ul></li>
+</ul>
+
+<h2><a name="Prep">準備</a></h2>
+
+<p>　本マクロを初めて起動する前にいくつかするべき準備があります。</p>
+
+<h3>必須の準備</h3>
+
+<p>　ここに記載の内容は新規インストール後に必ず行ってください。</p>
+
+<p>　なお、<span class="file">README.txt</span>の&lt;5. インストールとバージョンアップ、アンインストール>と重複して記載しています。すでに実施済みの場合やアップデートの場合は読み飛ばしてください。</p>
+
+<h4><a href="#SettingsCs">IDパスワード設定ファイル</a>の作成</h4>
+
+<p>　配布ファイルに同梱された<span class="file">d.hatena.mac.Settings.cs<em>.sample</em></span>について、コピーした上でファイル名を変更(下記のようにファイル名末尾の"<em>.sample</em>"を削除)してください。</p>
+
+<table align="center" rules="rows">
+  <tr bgcolor="#a9d9a9" align="center">
+    <td>変更前</td>
+    <td></td>
+    <td>変更後</td>
+  </tr>
+  <tr>
+    <td>d.hatena.mac.Seemings.cs<em>.sample</em></td>
+    <td>→</td>
+    <td>d.hatena.mac.Seemings.cs</td>
+  </tr>
+</table>
+
+<p>　初めて起動する際に<strong>IDパスワード設定ファイルがメインマクロ(<span class="file">d.hatena.mac</span>)と同じフォルダに存在しないとマクロの実行は中断されます</strong>。なので、ファイル名変更はマクロ実行前に必ず行ってください。</p>
+
+<h3>おすすめする準備</h3>
+
+<p>　この項目はしてもしなくてもいいけど、した方が断然便利になる準備です。というか、することを前提にマクロを作っています。</p>
+
+<p>　なお、これらの操作は事後(一回以上マクロ実行後)に行ってもいいです。また、バージョンアップの際には(すでにファイルが存在するなら)再度する必要はありません。</p>
+
+<p>　<a href="#PrepTag" title="カテゴリ(タグ)を挿入 - 準備">カテゴリ補完用辞書ファイルの作成</a>、<a href="#PrepNota" title="はてな記法を挿入 - 準備">はてな記法入力マクロの準備</a>も参照してください。</p>
+
+<h4>はてダID・パスワードの設定</h4>
+
+<p>　通常、はてダに接続するたびにIDとパスワードを問い合わせます。それが面倒くさい場合は準備をした方がちょっと幸せになります。</p>
+
+<p>　ここで指定してある場合でも、記事ごとに都度指定されたIDが優先されます。<a href="#IndicateID">投稿者(日記のID)を指定する例</a>を参照してください。また一度投稿などを行った秀丸(同じファイル・同じタブ)では同じIDを使い回します。その他、ID決定についての詳細は<a href="#ID">はてダIDの決定順序</a>で説明しています。</p>
+
+<ul>
+<li><p>はてダIDを一つしか使わない場合</p>
+
+<p>　メインマクロ(<span class="file">d.hatena.mac</span>)で指定します。いわゆるハードコーディングです。</p>
+
+<p>　複数のIDを使い分けている場合にはこの設定はしないでください。</p>
+
+<p><strong>準備すること:以下の要領で。</strong></p>
+
+<p>　メインマクロ(<span class="file">d.hatena.mac</span>)を編集する。9行目あたりに</p>
+
+<pre><code>$id = "";
+</code></pre>
+
+<p>とあると思うので、(id:foobarの場合<kbd>$id = "foobar";</kbd>というように)IDを追記して保存する。</p></li>
+<li><p><a name="SettingsCs">はてダIDを複数使い分ける場合</a></p>
+
+<p>　IDパスワード設定ファイル(<span class="file">d.hatena.mac.Settings.cs</span>)に記載します。パスワードの指定もできます。</p>
+
+<p><strong>準備すること:以下の要領で。</strong></p>
+
+<p>　IDパスワード設定ファイル(<span class="file">d.hatena.mac.Settings.cs</span>)を編集する。15行目あたりに</p>
+
+<pre><code>hash[""] = "";      // IDとパスワード
+</code></pre>
+
+<p>とあると思うので、そこにID(と必要に応じてパスワード)を追記して保存する。</p>
+
+<p>　下記の例では、1行目はid:userAでそのパスワードを記載しておく場合、2行目はid:userBでそのパスワードを記載しない場合を想定。</p>
+
+<pre><code>hash["userA"] = "passwordA";  
+hash["userB"] = "";
+</code></pre>
+
+<p>　下記の例では、1行目はid:userAでそのパスワードを記載しておく場合、2行目はid:userBでそのパスワードを記載しない場合を想定。</p></li>
+</ul>
+
+<h4>ファイル名の変更</h4>
+
+<p>　配布ファイルに同梱されたファイルのうち、ファイル名末尾が"<em>.sample</em>"となっているファイルについて、コピーした上でファイル名を変更(下記のようにファイル名末尾の"<em>.sample</em>"を削除)しておくといいです。</p>
+
+<table align="center" rules="rows">
+  <tr bgcolor="#a9d9a9" align="center">
+    <td>変更前</td>
+    <td></td>
+    <td>変更後</td>
+    <td>用途</td>
+  </tr>
+  <tr>
+    <td>d.hatena.mac.insnotations.mac<em>.sample</em></td>
+    <td>→</td>
+    <td>d.hatena.mac.insnotations.mac</td>
+    <td><a href="#PrepNota">はてな記法入力マクロ</a></td>
+  </tr>
+  <tr>
+    <td>d.hatena.mac.YourID.tags.list<em>.sample</em></td>
+    <td>→</td>
+    <td>d.hatena.mac.YourID.tags.list</td>
+    <td><a href="#PrepTag">カテゴリ補完用辞書ファイル</a></td>
+  </tr>
+  <tr>
+    <td>d.hatena.mac.ini<em>.sample</em></td>
+    <td>→</td>
+    <td>d.hatena.mac.ini</td>
+    <td><a href="#Ini">動作設定を記載したファイル</a></td>
+  </tr>
+</table>
+
+<h2><a name="HowToUse">使い方</a></h2>
+
+<p>　本マクロの大まかな流れを説明します。メニューの各項目については個別の説明(後述)を参照してください。</p>
+
+<ol>
+<li><p><a href="#Prep">準備</a>をする。終わっていたら次へ。  </p>
+
+<p>初回起動時、<strong>IDパスワード設定ファイル(<span class="file">d.hatena.mac.Settings.cs</span>)が存在しないとマクロの実行は中断されます</strong>。</p></li>
+<li><p>投稿または編集する場合はあらかじめ文章を用意しておきます(下記のような感じ。詳細は<a href="#Format">データ形式について</a>をご覧ください)。それ以外の場合は次へ。</p>
+
+<ul><li>日記にしたい文章を秀丸で開くか文章を作成してください。</li>
+<li><p>作成済みの文章の一部を日記として使いたい場合にはその部分を範囲選択してください。(この場合、説明文中の「編集中の秀丸の一番最初」を「選択範囲の一番最初」という風に適宜読み替えてください。)</p>
+
+<pre><code>[カテゴリA] 最初の記事のタイトル  
+最初の記事の内容。こういう感じで文章を書き連ねていく。
+当然はてな記法も記載できる。
+
+
+*2番目の記事のタイトル  
+2番目の記事の内容。もし本文を別の記事としていくつかに分けたいのなら、
+上の行のように見出し記法で分ける。
+最初の記事のタイトルは見出し記法で書かない。
+</code></pre></li></ul></li>
+<li><p>本マクロを起動してください。<em>このマクロで使う実行ファイルetcの有無・新旧を確認し最新のファイルがなければ<strong>自動的に</strong>コンパイル(作成)します。コンパイル中はアウトプット枠に経過を表示します。</em></p>
+
+<p>　<em>最新のファイルがあったりコンパイルが成功したら次の処理に進みます。</em>うまくいかなかったりした場合は<a href="#Compile">コンパイルについて</a>を参照。 <br />
+　なおコンパイルに成功したら、IDパスワード設定ファイルを削除してもかまいません。</p></li>
+<li><p><em>続いてメニューを表示します。</em>以下の7項目よりいずれかを選択してください(アクセスキーの押下、たとえば「取得」であれば<span class="key">G</span>キーの押下でもいけます)。</p>
+
+<ul><li><a href="#Post">投稿</a></li>
+<li><a href="#Get">取得</a></li>
+<li><a href="#Mod">修正</a></li>
+<li><a href="#Del">削除</a></li>
+<li><a href="#Nota">はてな記法を入力</a></li>
+<li><a href="#Tag">カテゴリ(タグ)を入力</a></li>
+<li>ヘルプ</li></ul></li>
+</ol>
+
+<h3><a name="Post">投稿</a></h3>
+
+<p>　秀丸で編集中の内容(範囲選択していたらその範囲)を、はてダの日記に投稿したり下書きとして保存します。 <br />
+(下書きとして保存されていた記事を日記として公開するのは<a href="#Mod">修正</a>でできます。)</p>
+
+<p>　データの形式については<a href="#Format">データ形式について</a>をご覧ください。</p>
+
+<h3><a name="Get">取得</a></h3>
+
+<p>　記事の一覧をメニューで表示します。選択された記事を取得します。</p>
+
+<p>　編集中の文章に挿入するかダイアログに表示するか尋ねますので、適切な方を選択してください。</p>
+
+<h3><a name="Mod">修正</a></h3>
+
+<p>　秀丸で編集中の内容(範囲選択していたらその範囲)を、既存の日記や下書きに上書きします。あるいは、下書きを日記として公開するときもここで行います。 <br />
+(記事のエントリーIDなどを指定する(手入力する)のは現実的じゃないので、事前に<a href="#Get">取得</a>しておくといいです。)</p>
+
+<p>　データの形式については<a href="#Format">データ形式について</a>をご覧ください。</p>
+
+<h4>既存の記事を修正</h4>
+
+<p>　<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/blog/&lt;日付&gt;/&lt;エントリーID&gt;</code>または<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/draft/&lt;エントリーID&gt;</code>という行がデータ(範囲選択していたらその範囲)にあればその指定の記事を、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を上書きします。</p>
+
+<h4>下書きを公開</h4>
+
+<p>　<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/draft/&lt;エントリーID&gt;</code>という行がデータ(範囲選択していたらその範囲)にあればその指定の下書きを公開します。</p>
+
+<p>　当該の下書きを事前に<a href="#Get">取得</a>しておき、その行頭の<kbd>draft</kbd>を<kbd>blog</kbd>に変更してから<a href="#Mod">修正</a>すると簡単にできます。</p>
+
+<h3><a name="Del">削除</a></h3>
+
+<p>　はてダの記事を削除します。</p>
+
+<p>　ほかと同様、<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/blog/&lt;日付&gt;/&lt;エントリーID&gt;</code>または<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/draft/&lt;エントリーID&gt;</code>という行があればその記事を、なければ記事を選択するメニューを表示しますのでそこで選んだ記事を削除します。</p>
+
+<h3><a name="Nota">はてな記法を挿入</a></h3>
+
+<p>　はてな記法の一覧をメニューで表示します。ユーザが選択した記法を入力します。</p>
+
+<p>　下記の<a href="#PrepNota">はてな記法の挿入準備</a>が終わっている状態でこの項目を選択すると、はてな記法の一覧をメニューを表示しますので、その中から適切な項目を選択してください。カーソル位置にその書式を挿入し、さらにマクロがよきに計らいます(具体的には以下)。</p>
+
+<ul>
+<li>範囲選択してあった場合は、はてな記法中の全角文字を選択範囲で置換。
+<ul><li>記法中の "。。" 部分を選択範囲全体で置換。</li>
+<li>記法中の "～～" 部分を選択範囲1行ごとに置換。(選択範囲の行数 個の書式を生成する。)</li></ul></li>
+<li>記法中に "～～" があればその部分を削除、なければ全角文字列を範囲選択してマクロ終了。
+<ul><li>カーソルを移動させることなく、当該部分に沿った内容をすぐに書き始めることができます。</li></ul></li>
+<li>全角文字列を検索文字列に設定。
+<ul><li>秀丸の「次の候補」(通常<span class="key">F3</span>キー)で、書式中の次の全角部分に移動できるようになります。</li></ul></li>
+</ul>
+
+<h4><a name="PrepNota">はてな記法の挿入 - 準備</a></h4>
+
+<p>　この機能を使うには準備をしないといけないです。</p>
+
+<ol>
+<li><p>配布ファイルに同梱の<span class="file">d.hatena.mac.insnotations.mac.sample</span>をメインマクロ(<span class="file">d.hatena.mac</span>)と同じフォルダに置いておく。</p>
+
+<p>通常すでにあると思います。<span class="file">d.hatena.mac.insnotations.mac</span>というファイルでもOK。</p></li>
+<li>ネットにつながる環境でメインマクロを起動する。</li>
+<li>[はてな記法]→[データ取得してメニュー再構築]の順で選択する。</li>
+</ol>
+
+<p>だけでいいです。あとはマクロが勝手に処理を進めます。</p>
+
+<blockquote>
+  <p>具体的に何をしているかというと、<em>メインマクロと同じフォルダに<span class="file">d.hatena.mac.insnotations.mac</span>という名前のファイルを作り(既にある場合はスキップ)、そのマクロが<a href="http://hatenadiary.g.hatena.ne.jp/keyword/%E3%81%AF%E3%81%A6%E3%81%AA%E8%A8%98%E6%B3%95%E4%B8%80%E8%A6%A7" title="はてな記法一覧 - はてなダイアリーのヘルプ">はてな記法一覧ページ</a>にアクセスしデータを取得し加工、自分自身を開き、加工したデータで置き換え</em>...という感じです。</p>
+</blockquote>
+
+<p>　<em>処理が終われば一覧を表示します。</em></p>
+
+<h5>insnotations.macの改造(秀丸マクロに詳しい方へ)</h5>
+
+<p>　はてな記法入力マクロ(<span class="file">d.hatena.mac.insnotations.mac</span>。特にmake_menu関数)を編集するといくらでも便利になります。  </p>
+
+<p>　特に、通常文章が挿入される記法((スーパー)pre記法や脚注記法など)中の<kbd>～～</kbd>を<kbd>。。</kbd>にしておくと、上述の "記法中の「。。」部分を選択範囲全体で置換" という機能を利用できてちょっと編集が楽になると思います。</p>
+
+<p>　なお、<strong>「データ取得してメニュー再構築」を選択すると、この部分(はてな記法入力マクロのmake_menu関数全体)が再編集されます</strong>のでお気をつけください。</p>
+
+<h4>うまくいかなかった場合</h4>
+
+<p>　メインマクロ(<span class="file">d.hatena.mac</span>)があるフォルダにはてな記法入力マクロ(<span class="file">d.hatena.mac.insnotations.mac</span>)があり実行できているかか確認してください。なお、実行できている場合はタイトルバーが「入力したいはてな記法を選択してください。」となっています。また表示されるメニューが「データ取得してメニュー再構築」旨という項目しかない場合はその項目を選んでください。その際何か失敗していないかご確認ください。その他、管理者権限を確認してください。</p>
+
+<h3><a name="Tag">カテゴリ(タグ)を挿入</a></h3>
+
+<p>　各タイトルに記載するカテゴリーを挿入します。</p>
+
+<p>　厳密に言うと、カーソル位置のカテゴリ(タグ)を補完します。カーソルが行頭にある場合や <strong>]</strong> の後ろにある場合のみ挿入します。</p>
+
+<p>　なお、はてダIDが設定されていない(まだ投稿などを行っていない)秀丸では、IDを決定する処理を先に行うので数秒程度時間がかかります。</p>
+
+<h4><a name="PrepTag">準備</a></h4>
+
+<p>　この機能を使うには準備をした方がいいです。はてダのIDごとに「カテゴリ補完用辞書ファイル」を、メインマクロと同じディレクトリに作り適切に編集するだけです。</p>
+
+<ol>
+<li>配布ファイルに同梱の<span class="file">d.hatena.mac.YourID.tags.list.sample</span>を<span class="file">d.hatena.mac.&lt;あなたのID>.tags.list</span>という風に(コピーして)改名する。これを「カテゴリ補完用辞書ファイル」とする。
+<ul><li>たとえば id:<em>foobar</em> のはてダのカテゴリ補完用辞書ファイルは<span class="file">d.hatena.mac.foobar.tags.list</span>というファイル名になります。</li></ul></li>
+<li>カテゴリ補完用辞書ファイルを開きカテゴリを記載して閉じる。
+<ul><li>書式は下記参照。筆者のはてダで使用しているカテゴリをあらかじめ記載していますので参考にしてください。</li></ul></li>
+</ol>
+
+<h5>辞書ファイルの書式</h5>
+
+<p>　以下の例を元に説明します。</p>
+
+<pre><code>    [秀丸]
+    [秀丸][マクロ]
+    [自作]          ソフトもハードも工作もプログラミングも
+    [秀丸][マクロ][自作][d.hatena.mac]   はてなダイアリー用マクロの話題
+</code></pre>
+
+<ul>
+<li>各カテゴリは1行ごとに記載し、各カテゴリタグは <strong>[ ]</strong> でくくります。</li>
+<li>1行に複数のカテゴリを記載できます(2、4行目)。
+<ul><li>たとえば <em>[マクロ]</em> カテゴリは必ず <em>[秀丸]</em> カテゴリとともに用いるので、<code>[秀丸][マクロ]</code>と1行で記載しています。</li></ul></li>
+<li>半角スペースの連続から行末までは補完時のみ表示されますので、註釈とか覚え書きとかそういうのを書いておくといいです(3、4行目)。
+<ul><li>3行目の<code>[自作]          ソフトもハードも工作もプログラミングも</code>では「          ソフトもハードも工作もプログラミングも」という部分が該当します。</li></ul></li>
+<li>入力する際は、タグの途中にある文字列も補完の対象となります。
+<ul><li>たとえば<kbd>[マクロ</kbd>と入力するとこの文字列が含まれている <em>[秀丸][マクロ]</em>(2行目)や <em>[秀丸][マクロ][自作][d.hatena.mac]</em>(4行目)が補完の対象になります。</li>
+<li>完璧ではありませんのでよく使うカテゴリを行の先頭にしておくといいです。</li></ul></li>
+</ul>
+
+<h4>うまくいかなかった場合</h4>
+
+<p>　メインマクロ(<span class="file">d.hatena.mac</span>)があるフォルダにカテゴリ補完用辞書ファイル(<span class="file">d.hatena.mac.&lt;あなたのID>.tags.list</span>)があるか確認してください。このファイルの内容が適切か確認してください。その他、管理者権限を確認してください。</p>
+
+<h2><a name="Format">データ形式について</a></h2>
+
+<p>　日記として用いられる文章の形式について説明します。</p>
+
+<p>　なお、範囲選択している場合はその範囲のみを利用します。この場合「編集中の秀丸の一番最初」とあれば「選択範囲の一番最初」という風に適宜読み替えてください。</p>
+
+<h3>シンプルな例</h3>
+
+<p>　記事のタイトルには編集中の秀丸の一番最初の論理行を、日記の本文には2行目以降を自動的に割り当てます。もちろんはてダの見出し記法を本文中に含めることで新たな別の記事にすることができます。なお、1つめのタイトル(一番最初の論理行)には見出し記法の「*」は不要です。</p>
+
+<pre><code>    [秀丸] 秀丸ではてダの日記を書く  
+    　今日、秀丸ではてダの日記を投稿できるマクロを見つけた早速使ってみよう。
+
+    *[天気] 今日の天気  
+    ところで今日の天気は雨だった。
+</code></pre>
+
+<h3>日付を指定する例</h3>
+
+<p>　タイトルよりも前に<code>date:&lt;日時&gt;</code>とあったら、そこで指定された日時付けの記事とします。</p>
+
+<pre><code>    date: 2010/12/24 19:55  
+    [秀丸] 秀丸ではてダの日記を書く  
+    　今日は例年のように暇なので、秀丸ではてダの日記を投稿できるマクロを早速使ってみた。
+</code></pre>
+
+<p>という文章では、2010/12/24 19:55付けになります。  </p>
+
+<p>　<code>date:24</code>なら今月の24日付、<code>date:19:</code>なら本日の19時付けなどという風に簡単な記載で指定できますが、我ながらこの自動判定は信用してないので、<code>date:12/24</code>とか<code>date:19:00</code>のようにちょっと丁寧に書くことをおすすめします。 <br />
+(あ、時間だけの指定でも<code>date:</code>です。また<code>update:</code>や<code>updated:</code>も受け付けます。)</p>
+
+<p>　何か記事を<a href="#Get">取得</a>した時に<code>updated:～</code>という行があると思いますが、その形式がたぶんもっとも間違えにくいので、面倒でなければその形式で記載されることをおすすめします。</p>
+
+<h3><a name="IndicateID">投稿者(日記のID)を指定する例</a></h3>
+
+<p>　対象となるはてダユーザのID・日記の記事をあらかじめ指定しておくことができます。あらかじめIDを決めてしまえば、マクロはユーザ名を問い合わせないので少し処理が早くなります。</p>
+
+<p>　なおデータ中で指定されたIDは他よりも優先されるので、いつもとは違うIDなんかを使う場合におすすめします。詳細は<a href="#ID">はてダIDの決定順序</a>を参照してください。</p>
+
+<ul>
+<li><a href="#Post">投稿</a>時、タイトルよりも前に<code>blog:&lt;ID&gt;</code>とあったら、そこで指定されたIDのはてダに投稿します。<code>draft:&lt;ID&gt;</code>なら下書きに保存します。</li>
+<li><p><a href="#Mod">修正</a>・<a href="#Del">削除</a>時、<code>blog:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/blog/&lt;日付&gt;/&lt;エントリーID&gt;</code>という行があればその記事を対象にします。下書きの場合は<code>draft:http://d.hatena.ne.jp/&lt;あなたのID&gt;/atom/draft/&lt;エントリーID&gt;</code>です。</p>
+
+<p>なお記事のIDを指定する(手入力する)のは現実的じゃないので、当該の記事を本マクロで事前に<a href="#Get">取得</a>しておくといいです。</p>
+
+<pre><code>blog: foobar  
+[秀丸] 秀丸ではてダの日記を書く  
+　今日は例年のように暇なので、秀丸ではてダの日記を投稿できるマクロを早速使ってみた。
+</code></pre>
+
+<p>という文章で「投稿」したら、id:foobar名義のはてダへの記事になります。</p></li>
+</ul>
+
+<h3>複雑な例</h3>
+
+<p>　「blog:～」と「date:～」は共存できます。それぞれの後先は関係ありませんが、2つともほかの行(記事のタイトルや本文)よりも前でないといけません。同じ種類のものが複数ある場合はより後のものを対象にします。</p>
+
+<pre><code>    blog: foobar  
+    date: 12/24  
+    draft: baz  
+    date: 2/14  
+    [秀丸] 秀丸ではてダの日記を書く  
+    　今日は例年のように暇なので、秀丸ではてダの日記を投稿できるマクロを早速使ってみた。 
+</code></pre>
+
+<p>という文章では、id:baz名義のはてダの下書きに本年2月14日付で保存します。</p>
+
+<h2><a name="Ini">設定</a></h2>
+
+<p>　マクロの動作を任意で変更できる各種の設定について説明します。ここに記載の設定は、特に何もしなくても不都合が起きないと思いますので、必要なときだけ設定してください。</p>
+
+<p>　設定ファイルは<span class="file">d.hatena.mac.ini</span>です。配布ファイルに同梱の<span class="file">d.hatena.mac.ini<em>.sample</em></span>を(コピーして)改名してください。</p>
+
+<h3>d.hatena.macセクション</h3>
+
+<p>　マクロ全体の動作についての設定を記載するセクションです</p>
+
+<h4>Cache-Control キー</h4>
+
+<p>　本マクロがはてダに接続するときに用いるCOM(Msxml2.XMLHTTP.3.0)のキャッシュコントロールに用いるためのものです。</p>
+
+<p>　なお、ほかのキャッシュ対策として<tt>"If-Modified-Since"</tt>ヘッダ(すべて<tt>"Thu, 01 Jun 1970 00:00:00 GMT"</tt>に設定)もあります。その他キャッシュ対策としては<tt>"Pragma"</tt>キーもあります。</p>
+
+<p>　設定例：デフォルトは ""。</p>
+
+<pre><code>    Cache-Control = "no-cache, no-store, must-revalidate, post-check=0, pre-check=0"
+</code></pre>
+
+<h4>Pragma キー</h4>
+
+<p>　本マクロがはてダに接続するときに用いるCOM(Msxml2.XMLHTTP.3.0)のキャッシュコントロールに用いるためのものです。</p>
+
+<p>　この値を0以外にした場合は、<tt>"Pragma"</tt>ヘッダに<tt>"no-cache"</tt>という文字列を設定します。</p>
+
+<p>　なお、ほかのキャッシュ対策として<tt>"If-Modified-Since"</tt>ヘッダ(すべて<tt>"Thu, 01 Jun 1970 00:00:00 GMT"</tt>に設定)もあります。その他キャッシュ対策としては<tt>"Cache-Control"</tt>キーもあります。</p>
+
+<p>　設定例：デフォルトは 0。</p>
+
+<pre><code>    Pragma = 1
+</code></pre>
+
+<h2><a name="Material">資料</a></h2>
+
+<p>　動作とかそういう内部的な話です。</p>
+
+<h3><a name="ID">はてダIDの決定順序</a></h3>
+
+<p>　通常、投稿などに用いるIDは以下の規則により決定されます。</p>
+
+<ol>
+<li><p>データ(秀丸で編集中の文章)中に<code>blog:ID</code>のような行があれば、そこで指定されたもの。</p>
+
+<p>　<a href="#IndicateID">投稿者(日記のID)を指定する例</a>を参照してください。</p></li>
+<li><p>静的変数中のID。</p>
+
+<p>　同じ秀丸で何度も操作する場合は、特にユーザ側でIDを指定しなくてもいいようにしています。</p>
+
+<p>　同じ秀丸(同一タブ・同一ファイル)で投稿・修正・削除・取得したことがあれば静的変数としてIDを保存しています。データ中で指定されていない限りこの変数を利用します。</p></li>
+<li><p>メインマクロ(<span class="file">d.hatena.mac</span>)で指定されたID</p>
+
+<p>　メインマクロにIDを指定(いわゆるハードコーディング)してあって、上記の条件を満たさない場合にこのIDを利用します。</p></li>
+<li><p><a name="SettingsCs">IDパスワード設定ファイル(<span class="file">d.hatena.mac.Settings.cs</span>)に記載されたID</a></p>
+
+<p>　上記の条件をすべて満たさない場合にダイアログを表示します。IDパスワード設定ファイルに記載のIDから択一できます。そこで選択されたIDを利用します。</p></li>
+<li><p>都度入力。</p>
+
+<p>　上記の条件をすべて満たさない場合にダイアログを表示します。そこで入力されたIDを利用します。</p></li>
+</ol>
+
+<h3><a name="Compile">コンパイルについて</a></h3>
+
+<ul>
+<li><p>マクロが確認するのは2つのファイルです。</p>
+
+<ul><li>本マクロ用実行ファイル(<span class="file">d.hatena.mac.exe</span>) : <span class="file">\src</span>フォルダにある4つのファイルからコンパイルされます。</li>
+<li>実行ファイルで用いるDLL(<span class="file">d.hatena.mac.util.dll</span>) : IDパスワード設定ファイル(<span class="file">d.hatena.mac.Settings.cs</span>)からコンパイルされます。</li></ul></li>
+<li><p>コンパイルにはcsc.exe(C#)を用います。</p></li>
+<li><p>コンパイルに失敗したらアウトプット枠やダイアログにエラーを表示します。以下の項目を確認して対処してください。</p>
+
+<ul><li>csc.exeが存在している(.NET Framework Ver.1.1.4322以上がインストールされている)か、実行可能な権限かなど。</li>
+<li>メインマクロと同じフォルダにIDパスワード設定ファイルや<span class="file">\src</span>フォルダが存在するか。</li>
+<li>IDパスワード設定ファイルにてIDやパスワードが適切に設定されているか、設定する際にC#の文法エラーになるような設定をしていないか。</li></ul></li>
+<li><p>コンパイルに成功したら、IDパスワード設定ファイルを削除してもかまいません。</p></li>
+</ul>
+
+</body>
+</html>
